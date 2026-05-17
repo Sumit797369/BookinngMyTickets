@@ -52,9 +52,9 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="w-full bg-[#0A0A0A] border border-[#FF4D00]/40  shadow-[0_0_25px_rgba(255,77,0,0.25)] overflow-visible sticky top-0 z-50">
+      <nav className="w-full bg-[#0A0A0A]  shadow-[0_10px_25px_rgba(255,77,0,0.18)] overflow-visible sticky top-0 z-50 border-b-4 border-[#FF4D00]">
         {/* Glow Line */}
-        <div className="h-[2px] w-full bg-[#FF4D00] shadow-[0_0_12px_#FF4D00]" />
+        <div  />
 
         <div className="flex items-center justify-between px-5 md:px-10 py-4">
           {/* Logo */}
