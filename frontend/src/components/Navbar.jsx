@@ -52,7 +52,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className="w-full bg-[#0A0A0A]  shadow-[0_10px_25px_rgba(255,77,0,0.18)] overflow-visible sticky top-0 z-50 border-b-4 border-[#FF4D00]">
+      <nav className="w-full bg-[#0A0A0A]  shadow-[0_10px_25px_rgba(255,77,0,0.18)] overflow-visible sticky top-0 z-[9999] border-b-4 border-[#FF4D00]">
         {/* Glow Line */}
         <div  />
 
