@@ -1,9 +1,13 @@
 import React from "react";
 import { Star } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const MovieCard = ({ movie }) => {
   return (
-    <div className="group bg-[#151515] rounded-3xl overflow-hidden border border-white/5 hover:border-[#FF4D00]/30 transition-all duration-500 hover:-translate-y-2">
+    <Link
+      to={`/movies/${movie.imdbID}`}
+      className="group bg-[#151515] rounded-3xl overflow-hidden border border-white/5 hover:border-[#FF4D00]/30 transition-all duration-500 hover:-translate-y-2 shadow-[0_0_25px_rgba(0,0,0,0.35)] block"
+    >
 
       {/* Poster */}
       <div className="overflow-hidden">
@@ -18,20 +22,25 @@ const MovieCard = ({ movie }) => {
       {/* Content */}
       <div className="p-5">
 
+        {/* Title */}
         <h3 className="text-white text-2xl font-bold line-clamp-1">
           {movie.Title}
         </h3>
 
+        {/* Info */}
         <p className="text-gray-400 mt-3 text-sm">
           {movie.Year} • {movie.Genre}
         </p>
 
+        {/* Bottom */}
         <div className="flex items-center justify-between mt-6">
 
-          <button className="px-5 py-3 rounded-2xl bg-[#FF4D00] hover:bg-[#ff5d1f] text-white font-semibold transition-all duration-300">
+          {/* Button */}
+          <button className="px-5 py-3 rounded-2xl bg-[#FF4D00] hover:bg-[#ff5d1f] text-white font-semibold transition-all duration-300 shadow-[0_0_20px_rgba(255,77,0,0.35)] hover:scale-105">
             Buy Tickets
           </button>
 
+          {/* Rating */}
           <div className="flex items-center gap-2 text-[#FFCC00]">
 
             <Star
@@ -45,7 +54,7 @@ const MovieCard = ({ movie }) => {
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 

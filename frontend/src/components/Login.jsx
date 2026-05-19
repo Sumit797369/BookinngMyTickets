@@ -1,13 +1,7 @@
 // components/Login.jsx
 
 import React, { useState } from "react";
-import {
-  Mail,
-  Lock,
-  X,
-  Eye,
-  EyeOff,
-} from "lucide-react";
+import { Mail, Lock, X, Eye, EyeOff } from "lucide-react";
 
 import axios from "axios";
 import { toast } from "react-hot-toast";
@@ -16,9 +10,7 @@ import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import { serverUrl } from "../App";
 
-
 const Login = ({ open, onClose }) => {
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -87,13 +79,12 @@ const Login = ({ open, onClose }) => {
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       toast.success("Logged in with Google!");
-window.location.reload();
+      window.location.reload();
       onClose();
-
     } catch (error) {
       if (error.code !== "auth/popup-closed-by-user") {
         handleFirebaseError(error);
@@ -105,7 +96,6 @@ window.location.reload();
 
   // Login
   const handleLogin = async () => {
-
     const error = validateRequired();
 
     if (error) {
@@ -125,18 +115,15 @@ window.location.reload();
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       toast.success("Logged in successfully!");
       window.location.reload();
 
       onClose();
-
     } catch (error) {
-
-      const message =
-        error.response?.data?.message || "Login failed";
+      const message = error.response?.data?.message || "Login failed";
 
       setErrorMsg(message);
 
@@ -146,7 +133,6 @@ window.location.reload();
 
   // Signup
   const handleSignup = async () => {
-
     const error = validateRequired();
 
     if (error) {
@@ -167,7 +153,7 @@ window.location.reload();
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
       toast.success("Registration successful!");
@@ -177,11 +163,8 @@ window.location.reload();
       setName("");
       setEmail("");
       setPassword("");
-
     } catch (error) {
-
-      const message =
-        error.response?.data?.message || "Signup failed";
+      const message = error.response?.data?.message || "Signup failed";
 
       setErrorMsg(message);
 
@@ -192,15 +175,13 @@ window.location.reload();
   return (
     <div
       onClick={onClose}
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[100] px-4"
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[99999] px-4"
     >
-      
       {/* Modal */}
       <div
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-md bg-[#111111] border border-[#FF4D00]/30 rounded-3xl p-8 shadow-[0_0_35px_rgba(255,77,0,0.25)]"
       >
-        
         {/* Close */}
         <button
           onClick={onClose}
@@ -252,7 +233,6 @@ window.location.reload();
             alt="google"
             className="w-5 h-5"
           />
-
           Continue with Google
         </button>
 
@@ -267,7 +247,6 @@ window.location.reload();
 
         {/* Form */}
         <div className="space-y-5">
-
           {/* Name */}
           {isSignup && (
             <div>
@@ -308,9 +287,7 @@ window.location.reload();
 
           {/* Password */}
           <div>
-            <label className="text-gray-300 text-sm mb-2 block">
-              Password
-            </label>
+            <label className="text-gray-300 text-sm mb-2 block">Password</label>
 
             <div className="flex items-center bg-[#1A1A1A] border border-[#333] rounded-xl px-4 py-3 focus-within:border-[#FF4D00] transition-all duration-300">
               <Lock className="text-[#FF4D00]" size={20} />
@@ -318,9 +295,7 @@ window.location.reload();
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder={
-                  isSignup
-                    ? "Create password"
-                    : "Enter your password"
+                  isSignup ? "Create password" : "Enter your password"
                 }
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -329,16 +304,10 @@ window.location.reload();
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowPassword(!showPassword)
-                }
+                onClick={() => setShowPassword(!showPassword)}
                 className="text-gray-400 hover:text-[#FF4D00]"
               >
-                {showPassword ? (
-                  <EyeOff size={20} />
-                ) : (
-                  <Eye size={20} />
-                )}
+                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
           </div>
@@ -357,9 +326,7 @@ window.location.reload();
 
           {/* Submit */}
           <button
-            onClick={
-              isSignup ? handleSignup : handleLogin
-            }
+            onClick={isSignup ? handleSignup : handleLogin}
             className="w-full bg-[#FF4D00] text-black font-bold py-3 rounded-xl hover:scale-[1.02] transition-all duration-300 shadow-[0_0_20px_rgba(255,77,0,0.4)]"
           >
             {isSignup ? "Signup" : "Login"}
@@ -368,10 +335,7 @@ window.location.reload();
 
         {/* Toggle */}
         <p className="text-center text-gray-400 mt-6">
-          {isSignup
-            ? "Already have an account?"
-            : "Don’t have an account?"}{" "}
-
+          {isSignup ? "Already have an account?" : "Don’t have an account?"}{" "}
           <button
             onClick={() => {
               setIsSignup(!isSignup);
