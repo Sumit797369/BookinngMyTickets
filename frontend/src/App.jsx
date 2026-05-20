@@ -10,6 +10,7 @@ import Home from "./pages/Home";
 import { Toaster } from "react-hot-toast";
 import Footer from "./components/Footer";
 import Profile from "./pages/Profile";
+import ChooseShow from "./pages/ChooseShow";
 
 export const serverUrl = "http://localhost:8000";
 
@@ -18,20 +19,20 @@ const App = () => {
 
   return (
     <>
-    <Toaster
-  
-  containerStyle={{
-    top: 90,
-    right: 20,
-    zIndex: 999999,
-  }}
-/>
+      <Toaster
+        containerStyle={{
+          top: 90,
+          right: 20,
+          zIndex: 999999,
+        }}
+      />
       {!isAdminRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/movies" element={<Movies />} />
         <Route path="/movies/:id" element={<MovieDetails />} />
-        <Route path="/movies/:id/:date" element={<SeatLayouts />} />
+        <Route path="/movie/:id/shows/:date" element={<ChooseShow />} />
+        <Route path="/movie/:id/shows/:date/:seats" element={<SeatLayouts />} />
         <Route path="/my-bookings" element={<MyBookings />} />
         <Route path="/favorite" element={<Favorite />} />
         <Route path="/profile" element={<Profile />} />

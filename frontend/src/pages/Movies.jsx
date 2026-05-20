@@ -10,6 +10,7 @@ const API_KEY = "fa568b78";
 const Movies = () => {
 
   const [movies, setMovies] = useState([]);
+    const [loading, setLoading] = useState(true);
 
   useEffect(() => {
 
@@ -48,12 +49,32 @@ const Movies = () => {
 
       } catch (error) {
         console.log(error);
+      }finally {
+
+        setTimeout(() => {
+          setLoading(false);
+        }, 1500);
       }
     };
 
     fetchMovies();
 
   }, []);
+   if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+
+        <div className="flex gap-3">
+
+          <div className="w-5 h-5 rounded-full bg-[#FF4D00] animate-bounce" />
+
+          <div className="w-5 h-5 rounded-full bg-[#E61919] animate-bounce delay-150" />
+
+          <div className="w-5 h-5 rounded-full bg-[#FFCC00] animate-bounce delay-300" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <section className="relative min-h-screen bg-[#0A0A0A] px-6 md:px-16 py-20 overflow-hidden">

@@ -75,16 +75,24 @@ const MovieDetails = () => {
       return;
     }
 
-    navigate(`/movies/${id}/${selectedDate}`);
+    navigate(`/movie/${movie.imdbID}/shows/${selectedDate}`);
   };
 
   if (!movie) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center text-white text-2xl">
-        Loading...
+  return (
+    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+
+      <div className="flex gap-3">
+
+        <div className="w-5 h-5 rounded-full bg-[#FF4D00] animate-bounce" />
+
+        <div className="w-5 h-5 rounded-full bg-[#E61919] animate-bounce delay-150" />
+
+        <div className="w-5 h-5 rounded-full bg-[#FFCC00] animate-bounce delay-300" />
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <section className="relative min-h-screen bg-[#0A0A0A] overflow-hidden">
