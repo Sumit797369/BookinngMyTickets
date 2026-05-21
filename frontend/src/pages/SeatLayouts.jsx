@@ -1,6 +1,6 @@
 // pages/SeatLayouts.jsx
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { Clock3 } from "lucide-react";
 
@@ -19,26 +19,34 @@ const SeatLayouts = () => {
   const { theater, movie } = location.state || {};
 
   // Current Timing
- const initialTime = decodeURIComponent(
-  seats || ""
-).trim();
+  const initialTime = decodeURIComponent(seats || "").trim();
 
-const [selectedTime, setSelectedTime] =
-  useState(initialTime);
+  const [selectedTime, setSelectedTime] = useState(initialTime);
   // Selected Seats
   const [selectedSeats, setSelectedSeats] = useState([]);
 
   // Loading
   const [loading, setLoading] = useState(false);
 
+  const [pageLoading, setPageLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setPageLoading(false);
+    }, 1400);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   // Timings
   const timings = [
-  "09:20 AM",
-  "01:20 PM",
-  "04:30 PM",
-  "07:00 PM",
-  "10:15 PM",
-].map((time) => time.trim());
+    "09:20 AM",
+    "01:30 PM",
+    "11:25 AM",
+    "04:30 PM",
+    "10:30 AM",
+    "07:00 PM",
+  ].map((time) => time.trim());
   // Different booked seats according to timing
   const bookedSeats = useMemo(() => {
     // Morning show
@@ -159,6 +167,19 @@ const [selectedTime, setSelectedTime] =
     }, 1800);
   };
 
+  if (pageLoading) {
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="flex gap-2">
+          <div className="w-5 h-5 rounded-full bg-[#FF4D00] animate-bounce" />
+
+          <div className="w-5 h-5 rounded-full bg-[#E61919] animate-bounce delay-150" />
+
+          <div className="w-5 h-5 rounded-full bg-[#FFCC00] animate-bounce delay-300" />
+        </div>
+      </div>
+    );
+  }
   return (
     <section className="min-h-screen bg-[#0A0A0A] text-white relative overflow-hidden pt-28 pb-20 px-4 md:px-10">
       {/* Orange Glow */}
@@ -216,7 +237,7 @@ const [selectedTime, setSelectedTime] =
           </div>
 
           {/* Main */}
-          <div className="flex-1">
+          <div className="flex-1 max-w-[1200px] mx-auto">
             {/* Movie */}
             <div className="mb-10">
               <h1 className="text-4xl font-black">{movie?.Title}</h1>
@@ -234,12 +255,11 @@ const [selectedTime, setSelectedTime] =
             </div>
 
             {/* Seats */}
-            {/* Seats */}
             <div className="overflow-x-auto">
-              <div className="min-w-[1200px] flex flex-col items-center gap-8">
+              <div className="w-full flex flex-col items-center gap-8">
                 {/* Regular Rows */}
                 {["A", "B", "C", "D", "E", "F"].map((row, rowIndex) => (
-                  <div key={rowIndex} className="flex items-center gap-24">
+                  <div key={rowIndex} className="flex items-center justify-center gap-6 xl:gap-12">
                     {/* LEFT BLOCK */}
                     <div className="flex gap-3">
                       {Array.from({
@@ -255,7 +275,7 @@ const [selectedTime, setSelectedTime] =
                           <button
                             key={seatId}
                             onClick={() => handleSeatClick(seatId)}
-                            className={`w-12 h-12 rounded-lg border text-sm font-semibold transition-all duration-300 ${
+                            className={`w-8 h-8 md:w-10 md:h-10 rounded-lg border text-sm font-semibold transition-all duration-300 ${
                               isBooked
                                 ? "bg-gray-700 border-gray-700 text-white/70"
                                 : isSelected
@@ -284,7 +304,7 @@ const [selectedTime, setSelectedTime] =
                           <button
                             key={seatId}
                             onClick={() => handleSeatClick(seatId)}
-                            className={`w-12 h-12 rounded-lg border text-sm font-semibold transition-all duration-300 ${
+                            className={`w-8 h-8 md:w-10 md:h-10 rounded-lg border text-sm font-semibold transition-all duration-300 ${
                               isBooked
                                 ? "bg-gray-700 border-gray-700 text-white/70"
                                 : isSelected
@@ -301,7 +321,7 @@ const [selectedTime, setSelectedTime] =
                 ))}
 
                 {/* Recliner Section */}
-                <div className="mt-14 flex items-center gap-16">
+                <div className="mt-14 flex flex-wrap items-center justify-center gap-10">
                   {/* Recliner Left */}
                   <div className="flex gap-5">
                     {Array.from({
@@ -317,7 +337,7 @@ const [selectedTime, setSelectedTime] =
                         <button
                           key={seatId}
                           onClick={() => handleSeatClick(seatId)}
-                          className={`w-24 h-16 rounded-2xl border text-sm font-bold transition-all duration-300 ${
+                          className={`w-20 h-14 md:w-24 md:h-16 rounded-2xl border text-sm font-bold transition-all duration-300 ${
                             isBooked
                               ? "bg-gray-700 border-gray-700 text-white/70"
                               : isSelected
@@ -369,7 +389,7 @@ const [selectedTime, setSelectedTime] =
             </div>
 
             {/* Bottom */}
-            <div className="mt-16 bg-white/[0.03] border border-white/10 rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-8">
+            <div className="mt-16 w-full bg-white/[0.03] border border-white/10 rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-8">
               {/* Selected Seats */}
               <div>
                 <h3 className="text-2xl font-bold">Selected Seats</h3>
@@ -384,7 +404,12 @@ const [selectedTime, setSelectedTime] =
               {/* Total */}
               <div className="text-center">
                 <h2 className="text-5xl font-black text-[#FF4D00]">
-                  ₹{selectedSeats.length * 250}
+                  ₹
+                  {selectedSeats.reduce(
+                    (total, seat) =>
+                      seat.startsWith("R") ? total + 500 : total + 250,
+                    0,
+                  )}
                 </h2>
 
                 <p className="text-gray-400 mt-2">Total Amount</p>
@@ -394,7 +419,7 @@ const [selectedTime, setSelectedTime] =
               <button
                 onClick={handleCheckout}
                 disabled={loading}
-                className="px-10 py-5 rounded-2xl bg-[#FF4D00] hover:bg-[#ff5d1f] text-white font-bold text-lg transition-all duration-300 shadow-[0_0_35px_rgba(255,77,0,0.45)] hover:scale-105 active:scale-95 disabled:opacity-70"
+                className="w-full lg:w-auto px-10 py-5 rounded-2xl bg-[#FF4D00] hover:bg-[#ff5d1f] text-white font-bold text-lg transition-all duration-300 shadow-[0_0_35px_rgba(255,77,0,0.45)] hover:scale-105 active:scale-95 disabled:opacity-70"
               >
                 {loading ? (
                   <div className="flex items-center gap-3">

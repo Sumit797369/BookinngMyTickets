@@ -56,13 +56,13 @@ const ChooseShow = () => {
     {
       name: "PVR: MBD Mall, Jalandhar",
 
-      timings: ["09:20 PM", "01:30 PM"],
+      timings: ["09:20 AM", "01:30 PM"],
     },
 
     {
       name: "INOX: Reliance Mall",
 
-      timings: ["11:25 AM", "04:10 PM"],
+      timings: ["11:25 AM", "04:30 PM"],
     },
 
     {

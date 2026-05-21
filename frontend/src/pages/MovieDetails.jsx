@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import MovieCard from "../components/MovieCards";
+import { Heart } from "lucide-react";
 
 const API_KEY = "fa568b78";
 
@@ -17,6 +18,7 @@ const MovieDetails = () => {
   const [relatedMovies, setRelatedMovies] = useState([]);
 
   const [selectedDate, setSelectedDate] = useState("");
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const blockbusterMovies = [
     "Dhurandhar",
@@ -69,6 +71,38 @@ const MovieDetails = () => {
     fetchRelatedMovies();
   }, [id]);
 
+  useEffect(() => {
+    const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+
+    const exists = favorites.find((item) => item.imdbID === movie?.imdbID);
+
+    setIsFavorite(!!exists);
+  }, [movie]);
+
+  const handleFavorite = () => {
+    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+
+    const exists = favorites.find((item) => item.imdbID === movie.imdbID);
+
+    if (exists) {
+      favorites = favorites.filter((item) => item.imdbID !== movie.imdbID);
+
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+
+      setIsFavorite(false);
+
+      toast.success("Removed from favorites");
+    } else {
+      favorites.push(movie);
+
+      localStorage.setItem("favorites", JSON.stringify(favorites));
+
+      setIsFavorite(true);
+
+      toast.success("Added to favorites ❤️");
+    }
+  };
+
   const handleBookTickets = () => {
     if (!selectedDate) {
       toast.error("Please choose the date");
@@ -79,20 +113,18 @@ const MovieDetails = () => {
   };
 
   if (!movie) {
-  return (
-    <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+    return (
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="flex gap-3">
+          <div className="w-5 h-5 rounded-full bg-[#FF4D00] animate-bounce" />
 
-      <div className="flex gap-3">
+          <div className="w-5 h-5 rounded-full bg-[#E61919] animate-bounce delay-150" />
 
-        <div className="w-5 h-5 rounded-full bg-[#FF4D00] animate-bounce" />
-
-        <div className="w-5 h-5 rounded-full bg-[#E61919] animate-bounce delay-150" />
-
-        <div className="w-5 h-5 rounded-full bg-[#FFCC00] animate-bounce delay-300" />
+          <div className="w-5 h-5 rounded-full bg-[#FFCC00] animate-bounce delay-300" />
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
 
   return (
     <section className="relative min-h-screen bg-[#0A0A0A] overflow-hidden">
@@ -217,6 +249,22 @@ const MovieDetails = () => {
                 className="h-[64px] px-8 rounded-2xl bg-[#FF4D00] text-white font-bold text-lg transition-all duration-300 hover:scale-105 hover:bg-[#ff5d1f] flex items-center justify-center shadow-[0_0_25px_rgba(255,77,0,0.35)]"
               >
                 Book Tickets
+              </button>
+
+              {/* Favorite */}
+              <button
+                onClick={handleFavorite}
+                className={`w-16 h-16 rounded-2xl border flex items-center justify-center transition-all duration-300 ${
+                  isFavorite
+                    ? "bg-green-500 border-green-500 shadow-[0_0_25px_rgba(34,197,94,0.45)]"
+                    : "bg-white/5 border-white/10 hover:border-green-500/40"
+                }`}
+              >
+                <Heart
+                  size={28}
+                  fill={isFavorite ? "white" : "transparent"}
+                  className="text-white"
+                />
               </button>
             </div>
             {/* Date Picker */}
