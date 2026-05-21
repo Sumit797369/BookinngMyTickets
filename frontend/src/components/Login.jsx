@@ -104,32 +104,41 @@ const Login = ({ open, onClose }) => {
       return toast.error(error);
     }
 
-    try {
-      setErrorMsg("");
+   try {
+  setErrorMsg("");
 
-      await axios.post(
-        `${serverUrl}/api/auth/login`,
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-        },
-      );
+  const { data } = await axios.post(
+    `${serverUrl}/api/auth/login`,
+    {
+      email,
+      password,
+    },
+    {
+      withCredentials: true,
+    },
+  );
 
-      toast.success("Logged in successfully!");
-      window.location.reload();
+ 
 
-      onClose();
-    } catch (error) {
-      const message = error.response?.data?.message || "Login failed";
+  toast.success(
+    "Logged in successfully!"
+  );
 
-      setErrorMsg(message);
+  window.location.reload();
 
-      toast.error(message);
-    }
-  };
+  onClose();
+
+} catch (error) {
+
+  const message =
+    error.response?.data?.message ||
+    "Login failed";
+
+  setErrorMsg(message);
+
+  toast.error(message);
+}
+  }
 
   // Signup
   const handleSignup = async () => {
@@ -349,6 +358,6 @@ const Login = ({ open, onClose }) => {
       </div>
     </div>
   );
-};
+}
 
-export default Login;
+export default Login
