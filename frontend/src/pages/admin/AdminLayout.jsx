@@ -13,6 +13,7 @@ import {
 
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { serverUrl } from "../../App";
+import axios from "axios";
 
 const AdminLayout = () => {
   const location = useLocation();

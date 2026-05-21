@@ -30,30 +30,100 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
+    // ADMIN LOGIN
+    const admins = [
+      {
+        email: process.env.PVR_EMAIL,
+        password: process.env.PVR_PASSWORD,
+        name: "PVR: MBD Mall",
+      },
+
+      {
+        email: process.env.INOX_EMAIL,
+        password: process.env.INOX_PASSWORD,
+        name: "INOX: Reliance Mall",
+      },
+
+      {
+        email: process.env.CINEPOLIS_EMAIL,
+        password: process.env.CINEPOLIS_PASSWORD,
+        name: "Cinepolis: Viva Collage",
+      },
+    ];
+
+    const admin = admins.find(
+      (a) =>
+        a.email === email &&
+        a.password === password
+    );
+
+    // ADMIN FOUND
+    if (admin) {
+      const token = jwt.sign(
+        {
+          email: admin.email,
+          role: "admin",
+        },
+        process.env.JWT_SECRET,
+        {
+          expiresIn: "7d",
+        }
+      );
+
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure:
+          process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+
+      return res.status(200).json({
+        name: admin.name,
+        email: admin.email,
+        role: "admin",
+      });
     }
 
-    // 👇 Google user ko block karo
+    // NORMAL USER LOGIN
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({
+        message: "User not found",
+      });
+    }
+
+    // GOOGLE USER BLOCK
     if (user.provider === "google") {
       return res.status(400).json({
         message: "Please login with Google",
       });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await bcrypt.compare(
+      password,
+      user.password
+    );
+
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      }
+    );
 
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
+      secure:
+        process.env.NODE_ENV === "production",
       sameSite: "strict",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -64,12 +134,16 @@ export const login = async (req, res) => {
       email: user.email,
       role: user.role,
     });
+
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      message: error.message,
+    });
   }
 };
 
 export const googleAuth = async (req, res) => {
+  
   try {
     const { name, email, avatar } = req.body;
 
@@ -137,6 +211,14 @@ export const getMe = async (req, res) => {
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+     if (decoded.role === "admin") {
+      return res.status(200).json({
+        name: "Admin",
+        email: decoded.email,
+        role: "admin",
+      });
+    }
 
     const user = await User.findById(decoded.id).select("-password");
 
@@ -228,4 +310,4 @@ export const updateAvatar = async (req, res) => {
       message: error.message,
     });
   }
-};
+}
