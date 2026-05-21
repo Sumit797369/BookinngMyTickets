@@ -1,10 +1,10 @@
-import User from "../models/user.js"
-import jwt from "jsonwebtoken"
+import User from "../models/user.js";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     const existUser = await User.findOne({ email });
     if (existUser) {
@@ -16,11 +16,11 @@ export const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      provider: "local"
+      provider: "local",
+      role: role || "user",
     });
 
     return res.status(201).json({ message: "User registered successfully" });
-
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -38,7 +38,7 @@ export const login = async (req, res) => {
     // 👇 Google user ko block karo
     if (user.provider === "google") {
       return res.status(400).json({
-        message: "Please login with Google"
+        message: "Please login with Google",
       });
     }
 
@@ -47,95 +47,87 @@ export const login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-
-    return res.status(200).json({
-      id: user._id,
-      name: user.name,
-      email: user.email
-    });
-
-  } catch (error) {
-    return res.status(500).json({ message: error.message });
-  }
-};
-
-
-
-export const googleAuth = async (req, res) => {
-  try {
-    const { name, email, avatar } = req.body
-
-    if (!email) {
-      return res.status(400).json({ message: "email is required" })
-    }
-
-    let user = await User.findOne({ email })
-
-    if (!user) {
-      user = await User.create({ name, email, avatar, provider: "google" })
-    } else {
-      if (!user.avatar) user.avatar = avatar
-      if (!user.name) user.name = name
-      user.provider = "google"
-      await user.save()
-    }
-
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    )
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000
-    })
 
     return res.status(200).json({
       id: user._id,
       name: user.name,
       email: user.email,
-      avatar: user.avatar
-    })
-
+      role: user.role,
+    });
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({ message: `google auth error ${error}` })
+    return res.status(500).json({ message: error.message });
   }
-}
+};
+
+export const googleAuth = async (req, res) => {
+  try {
+    const { name, email, avatar } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "email is required" });
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = await User.create({ name, email, avatar, provider: "google" });
+    } else {
+      if (!user.avatar) user.avatar = avatar;
+      if (!user.name) user.name = name;
+      user.provider = "google";
+      await user.save();
+    }
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: `google auth error ${error}` });
+  }
+};
 
 export const logOut = async (req, res) => {
   try {
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict"
-    })
+      sameSite: "strict",
+    });
 
-    return res.status(200).json({ message: "Logged out successfully" })
-
+    return res.status(200).json({ message: "Logged out successfully" });
   } catch (error) {
-    return res.status(500).json({ message: `logout error ${error}` })
+    return res.status(500).json({ message: `logout error ${error}` });
   }
-}
+};
 
 export const getMe = async (req, res) => {
   try {
-
     const token = req.cookies.token;
 
     if (!token) {
@@ -144,13 +136,9 @@ export const getMe = async (req, res) => {
       });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded.id)
-      .select("-password");
+    const user = await User.findById(decoded.id).select("-password");
 
     if (!user) {
       return res.status(404).json({
@@ -159,9 +147,7 @@ export const getMe = async (req, res) => {
     }
 
     return res.status(200).json(user);
-
   } catch (error) {
-
     return res.status(500).json({
       message: error.message,
     });
@@ -170,7 +156,6 @@ export const getMe = async (req, res) => {
 
 export const updateProfile = async (req, res) => {
   try {
-
     const token = req.cookies.token;
 
     if (!token) {
@@ -179,10 +164,7 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const { name, avatar } = req.body;
 
@@ -194,13 +176,11 @@ export const updateProfile = async (req, res) => {
       },
       {
         new: true,
-      }
+      },
     ).select("-password");
 
     return res.status(200).json(user);
-
   } catch (error) {
-
     return res.status(500).json({
       message: error.message,
     });
@@ -209,7 +189,6 @@ export const updateProfile = async (req, res) => {
 
 export const updateAvatar = async (req, res) => {
   try {
-
     const token = req.cookies.token;
 
     if (!token) {
@@ -218,10 +197,7 @@ export const updateAvatar = async (req, res) => {
       });
     }
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findById(decoded.id);
 
@@ -237,8 +213,7 @@ export const updateAvatar = async (req, res) => {
       });
     }
 
-    const avatarUrl =
-      `http://localhost:8000/uploads/${req.file.filename}`;
+    const avatarUrl = `http://localhost:8000/uploads/${req.file.filename}`;
 
     user.avatar = avatarUrl;
 
@@ -248,9 +223,7 @@ export const updateAvatar = async (req, res) => {
       success: true,
       user,
     });
-
   } catch (error) {
-
     return res.status(500).json({
       message: error.message,
     });
