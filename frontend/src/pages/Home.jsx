@@ -39,7 +39,7 @@ const Home = () => {
           />
 
           <h1 className="text-[#FF4D00] text-4xl md:text-5xl font-black italic">
-            ookMyTickets
+            BookMyTickets
           </h1>
         </div>
 

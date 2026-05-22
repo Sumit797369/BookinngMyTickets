@@ -9,6 +9,8 @@ import {
   Ticket,
   CalendarDays,
   LogOut,
+  User,
+  ChevronDown,
 } from "lucide-react";
 
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
@@ -68,7 +70,7 @@ const AdminLayout = () => {
       <div className="w-[290px] bg-white/[0.03] border-r border-white/10 backdrop-blur-xl flex flex-col justify-between p-6">
         <div>
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 mb-14">
+          <Link to="/admin" className="flex items-center gap-3 mb-14">
             <img
               src="/bmt3.png"
               alt="logo"

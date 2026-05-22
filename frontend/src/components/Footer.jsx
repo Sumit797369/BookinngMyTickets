@@ -39,7 +39,7 @@ const Footer = () => {
               />
 
               <h1 className="text-[#FF4D00] text-3xl font-bold italic">
-                ookMyTickets
+                BookMyTickets
               </h1>
             </Link>
 
