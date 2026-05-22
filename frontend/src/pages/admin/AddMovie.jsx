@@ -72,14 +72,16 @@ const AddMovie = () => {
         />
 
         <input
-          type="text"
-          name="poster"
-          placeholder="Poster URL"
-          value={movieData.poster}
-          onChange={handleChange}
+          type="file"
+          accept="image/*"
+          onChange={(e) =>
+            setMovieData({
+              ...movieData,
+              poster: e.target.files[0],
+            })
+          }
           className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none"
         />
-
         <input
           type="text"
           name="language"
