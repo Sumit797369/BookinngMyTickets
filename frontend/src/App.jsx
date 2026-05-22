@@ -19,6 +19,10 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import ProtectedAdminRoute from "./pages/admin/ProtectedAdminRoute";
 import AdminLogin from "./pages/admin/AdminLoging";
 
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageMovies from "./pages/admin/ManageMovies";
+import AddMovie from "./pages/admin/AddMovie";
+
 export const serverUrl = "http://localhost:8000";
 
 const App = () => {
@@ -81,7 +85,7 @@ const App = () => {
           element={<AdminLogin />}
         />
 
-        {/* PROTECTED ADMIN ROUTES */}
+        {/* ADMIN ROUTES */}
         <Route
           path="/admin"
           element={
@@ -90,33 +94,35 @@ const App = () => {
             </ProtectedAdminRoute>
           }
         >
+          {/* DASHBOARD */}
           <Route
             index
-            element={
-              <h1 className="text-white text-5xl font-black">
-                Dashboard
-              </h1>
-            }
+            element={<AdminDashboard />}
           />
 
+          {/* MANAGE MOVIES */}
           <Route
-            path="manage-movies"
+            path="/admin/movies"
             element={
-              <h1 className="text-white text-5xl font-black">
-                Manage Movies
-              </h1>
+              // <h1 className="text-white text-5xl font-black">
+              //   Manage Movies
+              // </h1>
+              <ManageMovies/>
             }
           />
 
+          {/* ADD MOVIE */}
           <Route
-            path="add-movie"
+            path="/admin/add-movie"
             element={
-              <h1 className="text-white text-5xl font-black">
-                Add Movie
-              </h1>
+              // <h1 className="text-white text-5xl font-black">
+              //   Add Movie
+              // </h1>
+              <AddMovie/>
             }
           />
 
+          {/* BOOKINGS */}
           <Route
             path="bookings"
             element={
@@ -126,6 +132,7 @@ const App = () => {
             }
           />
 
+          {/* SHOWS */}
           <Route
             path="shows"
             element={

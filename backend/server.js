@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
 import cors from "cors"
 import authRouter from "./routers/auth.route.js";
+import adminRouter from "./routers/admin.routes.js";
 
 const app = express();
 const port = process.env.PORT || 8000
@@ -17,7 +18,7 @@ app.use(cors({
 app.use("/uploads", express.static("uploads"));
 
 app.use("/api/auth",authRouter)
-
+app.use("/api/admin", adminRouter);
 
 
 
