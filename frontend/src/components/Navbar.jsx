@@ -66,7 +66,7 @@ const Navbar = () => {
             />
 
             <h1 className="text-[#FF4D00] text-lg md:text-2xl font-bold italic tracking-wide">
-              ookMyTickets
+              BookMyTickets
             </h1>
           </Link>
 

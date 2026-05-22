@@ -88,13 +88,51 @@ const ChooseShow = () => {
   useEffect(() => {
     const fetchMovie = async () => {
       try {
+        // DATABASE MOVIE
+        const { data } = await axios.get(
+          `http://localhost:8000/api/movies/${id}`,
+        );
+
+        const normalizedMovie = {
+          _id: data._id,
+
+          title: data.title,
+
+          poster: data.poster,
+
+          language: data.language,
+
+          duration: data.duration,
+
+          genre: data.genre || [],
+
+          description: data.description,
+        };
+
+        setMovie(normalizedMovie);
+      } catch {
+        // OMDB MOVIE
         const { data } = await axios.get(
           `https://www.omdbapi.com/?apikey=${API_KEY}&i=${id}`,
         );
 
-        setMovie(data);
-      } catch (error) {
-        console.log(error);
+        const normalizedMovie = {
+          _id: data.imdbID,
+
+          title: data.Title,
+
+          poster: data.Poster,
+
+          language: data.Language,
+
+          duration: data.Runtime,
+
+          genre: data.Genre ? data.Genre.split(",") : [],
+
+          description: data.Plot,
+        };
+
+        setMovie(normalizedMovie);
       }
     };
 
@@ -127,24 +165,26 @@ const ChooseShow = () => {
       <div className="relative z-10">
         {/* Movie Info */}
         <div className="mb-10">
-          <h1 className="text-4xl md:text-5xl font-black">{movie.Title}</h1>
+          <h1 className="text-4xl md:text-5xl font-black">{movie.title}</h1>
 
           <div className="flex flex-wrap items-center gap-4 mt-5">
             {/* Runtime */}
             <div className="flex items-center gap-2">
               <Clock3 className="text-[#FFCC00]" size={22} />
 
-              <span className="text-lg">{formatDuration(movie.duration)}</span>
+              <span className="text-lg">
+                {formatDuration(movie.duration || movie.Runtime)}
+              </span>
             </div>
 
             {/* Genre */}
             <div className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300">
-              {movie.Genre}
+              {movie.genre?.join(", ")}
             </div>
 
             {/* Language */}
             <div className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300">
-              Hindi
+              {movie.language}
             </div>
           </div>
         </div>
@@ -193,7 +233,7 @@ const ChooseShow = () => {
                       key={idx}
                       onClick={() =>
                         navigate(
-                          `/movie/${movie.imdbID}/shows/${selectedDate}/${encodeURIComponent(time.trim())}`,
+                          `/movie/${movie._id}/shows/${selectedDate}/${encodeURIComponent(time.trim())}`,
                           {
                             state: {
                               theater: theater.name,
