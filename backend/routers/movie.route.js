@@ -1,7 +1,7 @@
 import express from "express";
 
 import upload from "../middlewares/upload.js";
-import { addMovie, getMovies } from "../controllers/movieController.js";
+import { addMovie, getMovieById, getMovies } from "../controllers/movieController.js";
 
 const movieRouter = express.Router();
 
@@ -12,5 +12,6 @@ movieRouter.post(
 );
 
 movieRouter.get("/", getMovies);
+movieRouter.get("/:id", getMovieById);
 
 export default movieRouter;

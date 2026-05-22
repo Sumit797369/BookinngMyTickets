@@ -16,6 +16,19 @@ const ChooseShow = () => {
   const [movie, setMovie] = useState(null);
 
   const navigate = useNavigate();
+  const formatDuration = (duration) => {
+    if (typeof duration === "string" && duration.includes("min")) {
+      const mins = parseInt(duration);
+
+      const hrs = Math.floor(mins / 60);
+
+      const remaining = mins % 60;
+
+      return `${hrs}h ${remaining}m`;
+    }
+
+    return duration;
+  };
 
   // Selected Date
   const [selectedDate, setSelectedDate] = useState(0);
@@ -118,11 +131,10 @@ const ChooseShow = () => {
 
           <div className="flex flex-wrap items-center gap-4 mt-5">
             {/* Runtime */}
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-gray-300">
-              <Clock3 size={18} className="text-[#FFCC00]" />
+            <div className="flex items-center gap-2">
+              <Clock3 className="text-[#FFCC00]" size={22} />
 
-              {/* Runtime fix */}
-              <span>{movie.Runtime}</span>
+              <span className="text-lg">{formatDuration(movie.duration)}</span>
             </div>
 
             {/* Genre */}

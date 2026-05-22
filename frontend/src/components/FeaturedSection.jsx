@@ -17,39 +17,65 @@ const FeaturedSection = () => {
     fetchMovies();
   }, []);
 
-  const fetchMovies = async () => {
+ const fetchMovies = async () => {
+  try {
+
+    // DATABASE MOVIES
+    let dbMovies = [];
+
     try {
-      // DATABASE MOVIES
-      const dbResponse = await axios.get(`${serverUrl}/api/movies`);
 
-      const dbMovies = dbResponse.data;
+      const { data } =
+        await axios.get(
+          `${serverUrl}/api/movies`
+        );
 
-      // OMDB MOVIES
-      const movieNames = [
-        "Dhurandhar",
-        "Dhurandhar The Revenge",
-        "Bhooth Bangla",
-        "Michael",
-        "Drishyam 3",
-        "Mortal Kombat II",
-        "The Devil Wears Prada 2",
-        "Jawan",
-        "Animal",
-        "Pathaan",
-        "RRR",
-        "Leo",
-        "Salaar",
-      ];
+      dbMovies = data;
 
-      const requests = movieNames.map((movie) =>
-        axios.get(`https://www.omdbapi.com/?apikey=${API_KEY}&t=${movie}`),
+    } catch (error) {
+
+      console.log(
+        "DB Error",
+        error
+      );
+    }
+
+    // OMDB MOVIES
+    const movieNames = [
+      "Dhurandhar",
+      "Animal",
+      "Jawan",
+      "RRR",
+    ];
+
+    const requests =
+      movieNames.map((movie) =>
+        axios.get(
+          `https://www.omdbapi.com/?apikey=${API_KEY}&t=${movie}`
+        )
       );
 
-      const responses = await Promise.allSettled(requests);
-      const omdbMovies = responses
-        .filter((res) => res.status === "fulfilled")
-        .map((res) => res.data)
-        .filter((movie) => movie.Response !== "False")
+    const responses =
+      await Promise.allSettled(
+        requests
+      );
+
+    const omdbMovies =
+      responses
+        .filter(
+          (res) =>
+            res.status ===
+            "fulfilled"
+        )
+        .map(
+          (res) =>
+            res.value.data
+        )
+        .filter(
+          (movie) =>
+            movie.Response !==
+            "False"
+        )
         .map((movie) => ({
           _id: movie.imdbID,
 
@@ -57,25 +83,34 @@ const FeaturedSection = () => {
 
           poster: movie.Poster,
 
-          language: movie.Language,
+          language:
+            movie.Language,
 
-          duration: movie.Runtime,
+          duration:
+            movie.Runtime,
 
-          genre: movie.Genre ? movie.Genre.split(",") : [],
+          genre: movie.Genre
+            ? movie.Genre.split(
+                ","
+              )
+            : [],
 
-          description: movie.Plot,
+          description:
+            movie.Plot,
         }));
 
-      // COMBINE BOTH
-      setMovies([...dbMovies, ...omdbMovies]);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
-    }
-  };
+    // COMBINE
+    setMovies([
+      ...dbMovies,
+      ...omdbMovies,
+    ].slice(0, 4));
+
+  } catch (error) {
+
+    console.log(error);
+
+  }
+};
 
   return (
     <section className="relative py-24 px-6 md:px-16 bg-[#0A0A0A] overflow-hidden">
