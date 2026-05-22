@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from "react";
+
 import axios from "axios";
+
 import MovieCard from "./MovieCards";
+
 import { Link } from "react-router-dom";
 
-// import MovieCard from "./MovieCard";
+import { serverUrl } from "../App";
 
 const API_KEY = "fa568b78";
 
@@ -11,35 +14,75 @@ const FeaturedSection = () => {
   const [movies, setMovies] = useState([]);
 
   useEffect(() => {
-    const fetchMovies = async () => {
-      try {
-        const movieNames = [
-          "Dhurandhar",
-          "Dhurandhar The Revenge",
-          "Bhooth Bangla",
-          "Michael",
-        ];
-
-        const requests = movieNames.map((movie) =>
-          axios.get(`https://www.omdbapi.com/?apikey=${API_KEY}&t=${movie}`),
-        );
-
-        const responses = await Promise.all(requests);
-
-        setMovies(responses.map((res) => res.data));
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
     fetchMovies();
   }, []);
 
+  const fetchMovies = async () => {
+    try {
+      // DATABASE MOVIES
+      const dbResponse = await axios.get(`${serverUrl}/api/movies`);
+
+      const dbMovies = dbResponse.data;
+
+      // OMDB MOVIES
+      const movieNames = [
+        "Dhurandhar",
+        "Dhurandhar The Revenge",
+        "Bhooth Bangla",
+        "Michael",
+        "Drishyam 3",
+        "Mortal Kombat II",
+        "The Devil Wears Prada 2",
+        "Jawan",
+        "Animal",
+        "Pathaan",
+        "RRR",
+        "Leo",
+        "Salaar",
+      ];
+
+      const requests = movieNames.map((movie) =>
+        axios.get(`https://www.omdbapi.com/?apikey=${API_KEY}&t=${movie}`),
+      );
+
+      const responses = await Promise.allSettled(requests);
+      const omdbMovies = responses
+        .filter((res) => res.status === "fulfilled")
+        .map((res) => res.data)
+        .filter((movie) => movie.Response !== "False")
+        .map((movie) => ({
+          _id: movie.imdbID,
+
+          title: movie.Title,
+
+          poster: movie.Poster,
+
+          language: movie.Language,
+
+          duration: movie.Runtime,
+
+          genre: movie.Genre ? movie.Genre.split(",") : [],
+
+          description: movie.Plot,
+        }));
+
+      // COMBINE BOTH
+      setMovies([...dbMovies, ...omdbMovies]);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setTimeout(() => {
+        setLoading(false);
+      }, 1000);
+    }
+  };
+
   return (
     <section className="relative py-24 px-6 md:px-16 bg-[#0A0A0A] overflow-hidden">
+      {/* GLOW */}
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-[#E61919]/10 blur-[120px] rounded-full" />
 
-      {/* Header */}
+      {/* HEADER */}
       <div className="flex items-center justify-between mb-14 relative z-10">
         <h2 className="text-4xl md:text-5xl font-black text-white">
           Now Showing
@@ -53,14 +96,14 @@ const FeaturedSection = () => {
         </Link>
       </div>
 
-      {/* Cards */}
+      {/* MOVIES */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
-        {movies.map((movie, index) => (
-          <MovieCard key={index} movie={movie} />
+        {movies.map((movie) => (
+          <MovieCard key={movie._id} movie={movie} />
         ))}
       </div>
 
-      {/* Show More Button */}
+      {/* BUTTON */}
       <div className="flex justify-center mt-14 relative z-10">
         <Link
           to="/movies"
@@ -68,7 +111,6 @@ const FeaturedSection = () => {
         >
           <span className="relative z-10">Show More</span>
 
-          {/* Hover Gradient */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#FF4D00] to-[#E61919] opacity-0 group-hover:opacity-100 transition-all duration-300" />
         </Link>
       </div>
