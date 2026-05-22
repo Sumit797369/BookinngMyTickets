@@ -5,19 +5,18 @@ import axios from "axios";
 import { serverUrl } from "../../App";
 
 const AddMovie = () => {
-  const [movieData, setMovieData] = useState({
-    title: "",
-    description: "",
-    poster: "",
-    language: "",
-    duration: "",
-    genre: "",
-  });
+  const [movieData, setMovieData] =
+    useState({
+      title: "",
+      description: "",
+      poster: null,
+      language: "",
+      genre: "",
+      hours: "",
+      minutes: "",
+    });
 
-  const formData = new FormData();
-
-  formData.append("poster", movieData.poster);
-
+  // HANDLE INPUT CHANGE
   const handleChange = (e) => {
     setMovieData({
       ...movieData,
@@ -25,43 +24,99 @@ const AddMovie = () => {
     });
   };
 
+  // SUBMIT
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const payload = {
-        ...movieData,
 
-        genre: movieData.genre.split(",").map((g) => g.trim()),
-      };
+      const formData = new FormData();
 
-      await axios.post(`${serverUrl}/api/movies/add`, payload, {
-        withCredentials: true,
-      });
+      // DURATION
+      const duration = `${movieData.hours}h ${movieData.minutes}m`;
 
-      alert("Movie Added");
+      formData.append(
+        "title",
+        movieData.title
+      );
 
+      formData.append(
+        "description",
+        movieData.description
+      );
+
+      formData.append(
+        "language",
+        movieData.language
+      );
+
+      formData.append(
+        "duration",
+        duration
+      );
+
+      formData.append(
+        "genre",
+        JSON.stringify(
+          movieData.genre
+            .split(",")
+            .map((g) => g.trim())
+        )
+      );
+
+      formData.append(
+        "poster",
+        movieData.poster
+      );
+
+      await axios.post(
+        `${serverUrl}/api/movies/add`,
+        formData,
+        {
+          withCredentials: true,
+
+          headers: {
+            "Content-Type":
+              "multipart/form-data",
+          },
+        }
+      );
+
+      alert("Movie Added Successfully");
+
+      // RESET
       setMovieData({
         title: "",
         description: "",
-        poster: "",
+        poster: null,
         language: "",
-        duration: "",
         genre: "",
+        hours: "",
+        minutes: "",
       });
+
     } catch (error) {
+
       console.log(error);
+
     }
   };
 
   return (
     <div className="min-h-screen text-white">
-      <h1 className="text-4xl font-black mb-10">Add Movie</h1>
 
+      {/* TITLE */}
+      <h1 className="text-4xl font-black mb-10">
+        Add Movie
+      </h1>
+
+      {/* FORM */}
       <form
         onSubmit={handleSubmit}
         className="grid grid-cols-1 md:grid-cols-2 gap-6"
       >
+
+        {/* MOVIE TITLE */}
         <input
           type="text"
           name="title"
@@ -71,7 +126,9 @@ const AddMovie = () => {
           className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none"
         />
 
+        {/* POSTER */}
         <div className="relative">
+
           <input
             type="file"
             accept="image/*"
@@ -80,7 +137,8 @@ const AddMovie = () => {
             onChange={(e) =>
               setMovieData({
                 ...movieData,
-                poster: e.target.files[0],
+                poster:
+                  e.target.files[0],
               })
             }
           />
@@ -89,15 +147,23 @@ const AddMovie = () => {
             htmlFor="posterUpload"
             className="flex items-center justify-between w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 cursor-pointer hover:border-[#FF4D00] hover:bg-[#FF4D00]/10 transition-all duration-300"
           >
+
             {/* LEFT */}
-            <span className="font-semibold text-gray-300">Add Poster</span>
+            <span className="font-semibold text-gray-300">
+              Add Poster
+            </span>
 
             {/* RIGHT */}
             <span className="text-sm text-gray-400 truncate max-w-[180px]">
-              {movieData.poster ? movieData.poster.name : "No file selected"}
+              {movieData.poster
+                ? movieData.poster.name
+                : "No file selected"}
             </span>
+
           </label>
         </div>
+
+        {/* LANGUAGE */}
         <input
           type="text"
           name="language"
@@ -107,15 +173,65 @@ const AddMovie = () => {
           className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none"
         />
 
-        <input
-          type="text"
-          name="duration"
-          placeholder="Duration"
-          value={movieData.duration}
-          onChange={handleChange}
-          className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none"
-        />
+        {/* DURATION */}
+        <div className="grid grid-cols-2 gap-4">
 
+          {/* HOURS */}
+          <select
+            name="hours"
+            value={movieData.hours}
+            onChange={handleChange}
+            className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white"
+          >
+            <option
+              value=""
+              className="bg-black"
+            >
+              Hours
+            </option>
+
+            {[1, 2, 3, 4, 5].map(
+              (hr) => (
+                <option
+                  key={hr}
+                  value={hr}
+                  className="bg-black"
+                >
+                  {hr} hr
+                </option>
+              )
+            )}
+          </select>
+
+          {/* MINUTES */}
+          <select
+            name="minutes"
+            value={movieData.minutes}
+            onChange={handleChange}
+            className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none text-white"
+          >
+            <option
+              value=""
+              className="bg-black"
+            >
+              Minutes
+            </option>
+
+            {[0, 15, 30, 45].map(
+              (min) => (
+                <option
+                  key={min}
+                  value={min}
+                  className="bg-black"
+                >
+                  {min} min
+                </option>
+              )
+            )}
+          </select>
+        </div>
+
+        {/* GENRES */}
         <input
           type="text"
           name="genre"
@@ -125,6 +241,7 @@ const AddMovie = () => {
           className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none md:col-span-2"
         />
 
+        {/* DESCRIPTION */}
         <textarea
           name="description"
           placeholder="Movie Description"
@@ -134,15 +251,22 @@ const AddMovie = () => {
           className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none md:col-span-2"
         />
 
-        <button className="group relative overflow-hidden flex items-center gap-3 bg-[#FF4D00] px-6 py-3 rounded-2xl font-semibold shadow-[0_0_20px_rgba(255,77,0,0.35)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(255,77,0,0.55)] md:col-span-2">
-          {/* Glow */}
+        {/* BUTTON */}
+        <button
+          type="submit"
+          className="group relative overflow-hidden flex items-center justify-center gap-3 bg-[#FF4D00] px-6 py-4 rounded-2xl font-semibold shadow-[0_0_20px_rgba(255,77,0,0.35)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(255,77,0,0.55)] md:col-span-2"
+        >
+
+          {/* GLOW */}
           <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-500 opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
-          {/* Shine Effect */}
+          {/* SHINE */}
           <div className="absolute top-0 left-[-100%] w-full h-full bg-white/20 skew-x-12 group-hover:left-[120%] transition-all duration-700" />
 
-          {/* Content */}
-          <div className="relative z-10 flex items-center gap-3">Add Movie</div>
+          {/* TEXT */}
+          <div className="relative z-10">
+            Add Movie
+          </div>
         </button>
       </form>
     </div>
