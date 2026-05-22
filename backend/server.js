@@ -19,7 +19,10 @@ app.use("/uploads", express.static("uploads"));
 
 app.use("/api/auth",authRouter)
 app.use("/api/admin", adminRouter);
-
+app.use(
+  "/uploads",
+  express.static("uploads")
+);
 
 
 connectDB().then(() => {
