@@ -20,6 +20,15 @@ import axios from "axios";
 const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [showDropdown, setShowDropdown] =
+  useState(false);
+
+// DUMMY USER
+const adminUser = {
+  name: "PVR Admin",
+
+  profilePicture: "",
+};
 
   const handleLogout = async () => {
     try {
@@ -32,6 +41,14 @@ const AdminLayout = () => {
       console.log(error);
     }
   };
+  const getInitials = (name) => {
+  return name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase();
+};
+
   const menuItems = [
     {
       name: "Dashboard",
