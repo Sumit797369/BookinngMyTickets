@@ -5,7 +5,7 @@ import { addMovie, getMovies } from "../controllers/movieController.js";
 
 const movieRouter = express.Router();
 
-router.post(
+movieRouter.post(
   "/add",
   upload.single("poster"),
   addMovie

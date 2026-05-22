@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRouter from "./routers/auth.route.js";
 import adminRouter from "./routers/admin.routes.js";
+import movieRouter from "./routers/movie.route.js";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -21,7 +22,8 @@ app.use("/uploads", express.static("uploads"));
 
 app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
-app.use("/uploads", express.static("uploads"));
+app.use("/api/movies/", movieRouter);
+
 
 connectDB()
   .then(() => {
