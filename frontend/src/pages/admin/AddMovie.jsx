@@ -71,17 +71,33 @@ const AddMovie = () => {
           className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none"
         />
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) =>
-            setMovieData({
-              ...movieData,
-              poster: e.target.files[0],
-            })
-          }
-          className="bg-white/5 border border-white/10 rounded-2xl px-5 py-4 outline-none"
-        />
+        <div className="relative">
+          <input
+            type="file"
+            accept="image/*"
+            id="posterUpload"
+            hidden
+            onChange={(e) =>
+              setMovieData({
+                ...movieData,
+                poster: e.target.files[0],
+              })
+            }
+          />
+
+          <label
+            htmlFor="posterUpload"
+            className="flex items-center justify-between w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 cursor-pointer hover:border-[#FF4D00] hover:bg-[#FF4D00]/10 transition-all duration-300"
+          >
+            {/* LEFT */}
+            <span className="font-semibold text-gray-300">Add Poster</span>
+
+            {/* RIGHT */}
+            <span className="text-sm text-gray-400 truncate max-w-[180px]">
+              {movieData.poster ? movieData.poster.name : "No file selected"}
+            </span>
+          </label>
+        </div>
         <input
           type="text"
           name="language"
