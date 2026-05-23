@@ -21,6 +21,12 @@ const bookingSchema = new mongoose.Schema(
 
     amount: Number,
 
+    theater: String,
+
+    date: String,
+
+    time: String,
+
     paymentStatus: {
       type: String,
       default: "paid",
@@ -28,8 +34,7 @@ const bookingSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
-export const Booking =
-  mongoose.model("Booking", bookingSchema);
+export const Booking = mongoose.model("Booking", bookingSchema);

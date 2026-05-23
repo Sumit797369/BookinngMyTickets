@@ -2,12 +2,15 @@ import {Booking} from "../models/bookingModel.js";
 
 export const bookTickets = async (req, res) => {
   try {
-    const {
-      showId,
-      seats,
-      amount,
-      movieId,
-    } = req.body;
+   const {
+  showId,
+  seats,
+  amount,
+  movieId,
+  theater,
+  date,
+  time,
+} = req.body;
 
     const token = req.cookies.token;
 
