@@ -212,13 +212,39 @@ export const getMe = async (req, res) => {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-     if (decoded.role === "admin") {
-      return res.status(200).json({
-        name: "Admin",
-        email: decoded.email,
-        role: "admin",
-      });
-    }
+    if (decoded.role === "admin") {
+
+  let adminName = "Admin";
+
+  if (
+    decoded.email.includes("pvr")
+  ) {
+    adminName = "PVR Admin";
+
+  } else if (
+    decoded.email.includes("inox")
+  ) {
+    adminName = "INOX Admin";
+
+  } else if (
+    decoded.email.includes(
+      "cinepolis"
+    )
+  ) {
+    adminName =
+      "Cinepolis Admin";
+  }
+
+  return res.status(200).json({
+    name: adminName,
+
+    email: decoded.email,
+
+    role: "admin",
+
+    profilePicture: "",
+  });
+}
 
     const user = await User.findById(decoded.id).select("-password");
 

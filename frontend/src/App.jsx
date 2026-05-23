@@ -22,14 +22,14 @@ import AdminLogin from "./pages/admin/AdminLoging";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageMovies from "./pages/admin/ManageMovies";
 import AddMovie from "./pages/admin/AddMovie";
+import AdminProfile from "./pages/admin/AdminProfile";
 
 export const serverUrl = "http://localhost:8000";
 
 const App = () => {
   const location = useLocation();
 
-  const isAdminRoute =
-    location.pathname.startsWith("/admin");
+  const isAdminRoute = location.pathname.startsWith("/admin");
 
   return (
     <>
@@ -49,41 +49,20 @@ const App = () => {
 
         <Route path="/movies" element={<Movies />} />
 
-        <Route
-          path="/movies/:id"
-          element={<MovieDetails />}
-        />
+        <Route path="/movies/:id" element={<MovieDetails />} />
 
-        <Route
-          path="/movie/:id/shows/:date"
-          element={<ChooseShow />}
-        />
+        <Route path="/movie/:id/shows/:date" element={<ChooseShow />} />
 
-        <Route
-          path="/movie/:id/shows/:date/:seats"
-          element={<SeatLayouts />}
-        />
+        <Route path="/movie/:id/shows/:date/:seats" element={<SeatLayouts />} />
 
-        <Route
-          path="/my-bookings"
-          element={<MyBookings />}
-        />
+        <Route path="/my-bookings" element={<MyBookings />} />
 
-        <Route
-          path="/favorite"
-          element={<Favorite />}
-        />
+        <Route path="/favorite" element={<Favorite />} />
 
-        <Route
-          path="/profile"
-          element={<Profile />}
-        />
+        <Route path="/profile" element={<Profile />} />
 
         {/* ADMIN LOGIN */}
-        <Route
-          path="/admin-login"
-          element={<AdminLogin />}
-        />
+        <Route path="/admin-login" element={<AdminLogin />} />
 
         {/* ADMIN ROUTES */}
         <Route
@@ -95,51 +74,29 @@ const App = () => {
           }
         >
           {/* DASHBOARD */}
-          <Route
-            index
-            element={<AdminDashboard />}
-          />
+          <Route index element={<AdminDashboard />} />
 
           {/* MANAGE MOVIES */}
-          <Route
-            path="/admin/movies"
-            element={
-              // <h1 className="text-white text-5xl font-black">
-              //   Manage Movies
-              // </h1>
-              <ManageMovies/>
-            }
-          />
+          <Route path="movies" element={<ManageMovies />} />
 
           {/* ADD MOVIE */}
-          <Route
-            path="/admin/add-movie"
-            element={
-              // <h1 className="text-white text-5xl font-black">
-              //   Add Movie
-              // </h1>
-              <AddMovie/>
-            }
-          />
+          <Route path="add-movie" element={<AddMovie />} />
+
+          {/* PROFILE */}
+          <Route path="profile" element={<AdminProfile />} />
 
           {/* BOOKINGS */}
           <Route
             path="bookings"
             element={
-              <h1 className="text-white text-5xl font-black">
-                Bookings
-              </h1>
+              <h1 className="text-white text-5xl font-black">Bookings</h1>
             }
           />
 
           {/* SHOWS */}
           <Route
             path="shows"
-            element={
-              <h1 className="text-white text-5xl font-black">
-                Shows
-              </h1>
-            }
+            element={<h1 className="text-white text-5xl font-black">Shows</h1>}
           />
         </Route>
       </Routes>
