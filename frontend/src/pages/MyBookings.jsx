@@ -1,5 +1,3 @@
-// pages/MyBookings.jsx
-
 import React, {
   useEffect,
   useState,
@@ -14,6 +12,8 @@ import {
   MapPin,
   Armchair,
 } from "lucide-react";
+
+import jsPDF from "jspdf";
 
 import { serverUrl } from "../App";
 
@@ -54,62 +54,110 @@ const MyBookings = () => {
   };
 
   // DOWNLOAD TICKET
-  const downloadTicket = (
-    booking
-  ) => {
+ const downloadTicket = (
+  booking
+) => {
 
-    const ticketContent = `
-======================================
-           MOVIE TICKET
-======================================
+  const doc = new jsPDF();
 
-Movie:
-${booking.movie.title}
+  // TITLE
+  doc.setFontSize(22);
 
-Theater:
-${booking.theater}
+  doc.text(
+    "Movie Ticket",
+    20,
+    20
+  );
 
-Date:
-${booking.date}
+  // LINE
+  doc.line(20, 25, 190, 25);
 
-Time:
-${booking.time}
+  // MOVIE
+  doc.setFontSize(16);
 
-Seats:
-${booking.seats.join(", ")}
+  doc.text(
+    `Movie: ${
+      booking.movie.title
+    }`,
+    20,
+    40
+  );
 
-Booked By:
-${booking.user.name}
+  // THEATER
+  doc.text(
+    `Theater: ${
+      booking.theater
+    }`,
+    20,
+    55
+  );
 
-Email:
-${booking.user.email}
+  // DATE
+  doc.text(
+    `Date: ${
+      booking.date
+    }`,
+    20,
+    70
+  );
 
-======================================
-Enjoy Your Movie 🍿
-======================================
-`;
+  // TIME
+  doc.text(
+    `Time: ${
+      booking.time
+    }`,
+    20,
+    85
+  );
 
-    const blob = new Blob(
-      [ticketContent],
-      {
-        type: "text/plain",
-      }
-    );
+  // SEATS
+  doc.text(
+    `Seats: ${booking.seats.join(
+      ", "
+    )}`,
+    20,
+    100
+  );
 
-    const url =
-      window.URL.createObjectURL(
-        blob
-      );
+  // USER
+  doc.text(
+    `Booked By: ${
+      booking.user.name
+    }`,
+    20,
+    115
+  );
 
-    const link =
-      document.createElement("a");
+  // EMAIL
+  doc.text(
+    `Email: ${
+      booking.user.email
+    }`,
+    20,
+    130
+  );
 
-    link.href = url;
+  // AMOUNT
+  doc.text(
+    `Amount Paid: ₹${booking.amount}`,
+    20,
+    145
+  );
 
-    link.download = `${booking.movie.title}-ticket.txt`;
+  // FOOTER
+  doc.setFontSize(12);
 
-    link.click();
-  };
+  doc.text(
+    "Enjoy Your Movie 🍿",
+    20,
+    180
+  );
+
+  // SAVE
+  doc.save(
+    `${booking.movie.title}-ticket.pdf`
+  );
+};
 
   // LOADING
   if (loading) {

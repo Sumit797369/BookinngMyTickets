@@ -15,6 +15,7 @@ const bookingSchema = new mongoose.Schema(
     show: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Show",
+      default:null
     },
 
     seats: [String],

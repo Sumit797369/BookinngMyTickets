@@ -1,4 +1,5 @@
 import { Booking } from "../models/bookingModel.js";
+import jwt from "jsonwebtoken";
 
 export const bookTickets = async (req, res) => {
   try {
@@ -26,11 +27,18 @@ export const bookTickets = async (req, res) => {
       time,
     });
     // UPDATE SHOW BOOKED SEATS
-    await Show.findByIdAndUpdate(showId, {
+   if (showId) {
+  await Show.findByIdAndUpdate(
+    showId,
+    {
       $push: {
-        bookedSeats: { $each: seats },
+        bookedSeats: {
+          $each: seats,
+        },
       },
-    });
+    }
+  );
+}
 
     return res.status(201).json({
       success: true,

@@ -1,13 +1,11 @@
-// pages/SeatLayouts.jsx
-
 import React, { useEffect, useMemo, useState } from "react";
-
 import { Clock3 } from "lucide-react";
-
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import toast from "react-hot-toast";
+import { serverUrl } from "../App";
+import axios from "axios";
 
-// import { toast } from "react-toastify";
+
 
 const SeatLayouts = () => {
   const navigate = useNavigate();
@@ -133,6 +131,8 @@ const SeatLayouts = () => {
     },
   ];
 
+ 
+
   // Seat Select
   const handleSeatClick = (seatId) => {
     // Already booked
@@ -151,22 +151,121 @@ const SeatLayouts = () => {
   };
 
   // Checkout
-  const handleCheckout = () => {
-    if (selectedSeats.length === 0) {
-      toast.error("Please select the seat");
+ const handleCheckout =
+  async () => {
+
+    if (
+      selectedSeats.length === 0
+    ) {
+      toast.error(
+        "Please select seats"
+      );
 
       return;
     }
 
-    setLoading(true);
+    try {
 
-    setTimeout(() => {
+      setLoading(true);
+
+      let finalMovieId =
+        movie?._id;
+
+      // IF OMDB MOVIE
+      if (
+        movie?._id?.startsWith(
+          "tt"
+        )
+      ) {
+
+        const { data } =
+          await axios.post(
+            `${serverUrl}/api/movies/create-omdb`,
+            {
+              title:
+                movie.title,
+
+              description:
+                movie.description,
+
+              poster:
+                movie.poster,
+
+              language:
+                movie.language,
+
+              duration:
+                movie.duration,
+
+              genre:
+                movie.genre,
+            }
+          );
+
+        finalMovieId =
+          data._id;
+      }
+
+      // CREATE BOOKING
+      await axios.post(
+        `${serverUrl}/api/bookings/book`,
+        {
+          showId: null,
+
+          movieId:
+            finalMovieId,
+
+          seats:
+            selectedSeats,
+
+          amount:
+            selectedSeats.reduce(
+              (total, seat) =>
+                seat.startsWith(
+                  "R"
+                )
+                  ? total + 500
+                  : total + 250,
+              0
+            ),
+
+          theater,
+
+          date:
+            new Date().toLocaleDateString(),
+
+          time:
+            selectedTime,
+        },
+        {
+          withCredentials: true,
+        }
+      );
+
+      toast.success(
+        "Tickets booked successfully 🍿"
+      );
+
+      navigate(
+        "/my-bookings"
+      );
+
+    } catch (error) {
+
+      console.log(error);
+
+      toast.error(
+        error.response?.data
+          ?.message ||
+          "Booking failed"
+      );
+
+    } finally {
+
       setLoading(false);
 
-      toast.success("Proceeding to checkout 🚀");
-    }, 1800);
+    }
   };
-
   if (pageLoading) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
@@ -240,7 +339,7 @@ const SeatLayouts = () => {
           <div className="flex-1 max-w-[1200px] mx-auto">
             {/* Movie */}
             <div className="mb-10">
-              <h1 className="text-4xl font-black">{movie?.Title}</h1>
+              <h1 className="text-4xl font-black">{movie?.title}</h1>
 
               <p className="text-gray-400 mt-2">{theater}</p>
             </div>

@@ -42,6 +42,59 @@ export const addMovie = async (
   }
 };
 
+export const createMovieFromOMDB =
+  async (req, res) => {
+    try {
+
+      const {
+        title,
+        description,
+        poster,
+        language,
+        duration,
+        genre,
+      } = req.body;
+
+      // CHECK IF MOVIE ALREADY EXISTS
+      const existingMovie =
+        await Movie.findOne({
+          title,
+        });
+
+      if (existingMovie) {
+        return res
+          .status(200)
+          .json(existingMovie);
+      }
+
+      // CREATE MOVIE
+      const movie =
+        await Movie.create({
+          title,
+
+          description,
+
+          poster,
+
+          language,
+
+          duration,
+
+          genre,
+        });
+
+      return res
+        .status(201)
+        .json(movie);
+
+    } catch (error) {
+
+      return res.status(500).json({
+        message: error.message,
+      });
+    }
+  };
+
 export const getMovieById =
   async (req, res) => {
     try {

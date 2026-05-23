@@ -9,7 +9,7 @@ import { isAuth } from "../middlewares/authmiddleware.js";
 const bookingRouter = express.Router();
 
 bookingRouter.post(
-  "/create",
+  "/book",
   isAuth,
   bookTickets,
 );
