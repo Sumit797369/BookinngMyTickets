@@ -7,6 +7,7 @@ import cors from "cors";
 import authRouter from "./routers/auth.route.js";
 import adminRouter from "./routers/admin.routes.js";
 import movieRouter from "./routers/movie.route.js";
+import bookingRouter from "./routers/booking.route.js";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -23,7 +24,7 @@ app.use("/uploads", express.static("uploads"));
 app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/movies/", movieRouter);
-
+app.use("/api/bookings", bookingRouter);
 
 connectDB()
   .then(() => {
