@@ -1,11 +1,6 @@
-// ChooseShow.jsx
-
 import React, { useEffect, useState } from "react";
-
 import { Clock3 } from "lucide-react";
-
 import axios from "axios";
-
 import { useNavigate, useParams } from "react-router-dom";
 
 const API_KEY = "fa568b78";
@@ -60,25 +55,27 @@ const ChooseShow = () => {
     };
   });
 
-  const theaters = [
-    {
-      name: "PVR: MBD Mall, Jalandhar",
+  // const theaters = [
+  //   {
+  //     name: "PVR: MBD Mall, Jalandhar",
 
-      timings: ["09:20 AM", "01:30 PM"],
-    },
+  //     timings: ["09:20 AM", "01:30 PM"],
+  //   },
 
-    {
-      name: "INOX: Reliance Mall",
+  //   {
+  //     name: "INOX: Reliance Mall",
 
-      timings: ["11:25 AM", "04:30 PM"],
-    },
+  //     timings: ["11:25 AM", "04:30 PM"],
+  //   },
 
-    {
-      name: "Cinepolis: Viva Collage",
+  //   {
+  //     name: "Cinepolis: Viva Collage",
 
-      timings: ["10:30 AM", "07:00 PM"],
-    },
-  ];
+  //     timings: ["10:30 AM", "07:00 PM"],
+  //   },
+  // ];
+  const [shows, setShows] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -134,8 +131,29 @@ const ChooseShow = () => {
     fetchMovie();
   }, [id]);
 
+  const fetchShows = async () => {
+    try {
+      const { data } = await axios.get(`${serverUrl}/api/shows`);
+
+      // FILTER MOVIE
+      const filteredShows = data.filter(
+        (show) => show?.movie?._id === id && show?.date === selectedDate,
+      );
+
+      setShows(filteredShows);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+
+  fetchShows();
+
+}, [selectedDate]);
   // Loading
-  if (!movie) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
         <div className="flex gap-3">
@@ -148,7 +166,6 @@ const ChooseShow = () => {
       </div>
     );
   }
-
   return (
     <section className="min-h-screen bg-[#0A0A0A] text-white pt-28 pb-20 px-4 md:px-10 relative overflow-hidden">
       {/* Orange Glow */}
@@ -207,7 +224,7 @@ const ChooseShow = () => {
 
         {/* Theaters */}
         <div className="space-y-8">
-          {theaters.map((theater, index) => (
+          {shows.map((show, index) => (
             <div
               key={index}
               className="bg-white/[0.03] border border-white/10 rounded-3xl p-6 hover:border-[#FF4D00]/30 transition-all duration-300"
@@ -216,14 +233,14 @@ const ChooseShow = () => {
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
                 {/* Left */}
                 <div>
-                  <h2 className="text-2xl font-bold">{theater.name}</h2>
+                  <h2 className="text-2xl font-bold">{show.theater}</h2>
 
                   <p className="text-gray-400 mt-2">Cancellation Available</p>
                 </div>
 
                 {/* Timings */}
                 <div className="flex flex-wrap gap-4">
-                  {theater.timings.map((time, idx) => (
+                  {show.timings.map((time, idx) => (
                     <button
                       key={idx}
                       onClick={() =>
@@ -231,7 +248,7 @@ const ChooseShow = () => {
                           `/movie/${movie._id}/shows/${selectedDate}/${encodeURIComponent(time.trim())}`,
                           {
                             state: {
-                              theater: theater.name,
+                              theater: show.theater,
                               movie,
                             },
                           },

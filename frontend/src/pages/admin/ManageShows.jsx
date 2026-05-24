@@ -7,6 +7,8 @@ import React, {
 
 import axios from "axios";
 
+import toast from "react-hot-toast";
+
 import {
   CalendarDays,
   Clock3,
@@ -39,7 +41,7 @@ const ManageShows = () => {
 
       screen: "",
 
-      timings: "",
+      timings: [],
     });
 
   // FETCH
@@ -51,7 +53,7 @@ const ManageShows = () => {
 
   }, []);
 
-  // MOVIES
+  // FETCH MOVIES
   const fetchMovies =
     async () => {
       try {
@@ -70,7 +72,7 @@ const ManageShows = () => {
       }
     };
 
-  // SHOWS
+  // FETCH SHOWS
   const fetchShows =
     async () => {
       try {
@@ -96,6 +98,7 @@ const ManageShows = () => {
 
   // HANDLE CHANGE
   const handleChange = (e) => {
+
     setShowData({
       ...showData,
 
@@ -104,6 +107,40 @@ const ManageShows = () => {
     });
   };
 
+  // HANDLE TIMINGS
+  const handleTimingSelect =
+    (time) => {
+
+      const isSelected =
+        showData.timings.includes(
+          time
+        );
+
+      if (isSelected) {
+
+        setShowData({
+          ...showData,
+
+          timings:
+            showData.timings.filter(
+              (t) =>
+                t !== time
+            ),
+        });
+
+      } else {
+
+        setShowData({
+          ...showData,
+
+          timings: [
+            ...showData.timings,
+            time,
+          ],
+        });
+      }
+    };
+
   // CREATE SHOW
   const handleSubmit =
     async (e) => {
@@ -111,25 +148,44 @@ const ManageShows = () => {
 
       try {
 
+        // VALIDATION
+        if (
+          !showData.movie ||
+          !showData.theater ||
+          !showData.date ||
+          !showData.screen ||
+          showData.timings
+            .length === 0
+        ) {
+
+          toast.error(
+            "Please fill all fields"
+          );
+
+          return;
+        }
+
         await axios.post(
           `${serverUrl}/api/shows/create`,
           {
             ...showData,
 
             timings:
-              showData.timings
-                .split(",")
-                .map((t) =>
-                  t.trim()
-                ),
+              showData.timings,
           },
           {
             withCredentials: true,
           }
         );
 
+        toast.success(
+          "Show created successfully 🎬"
+        );
+
+        // REFRESH
         fetchShows();
 
+        // RESET
         setShowData({
           movie: "",
 
@@ -139,17 +195,22 @@ const ManageShows = () => {
 
           screen: "",
 
-          timings: "",
+          timings: [],
         });
 
       } catch (error) {
 
         console.log(error);
 
+        toast.error(
+          error.response?.data
+            ?.message ||
+            "Failed to create show"
+        );
       }
     };
 
-  // DELETE
+  // DELETE SHOW
   const deleteShow =
     async (id) => {
       try {
@@ -159,6 +220,10 @@ const ManageShows = () => {
           {
             withCredentials: true,
           }
+        );
+
+        toast.success(
+          "Show deleted"
         );
 
         fetchShows();
@@ -266,14 +331,54 @@ const ManageShows = () => {
         />
 
         {/* TIMINGS */}
-        <input
-          type="text"
-          name="timings"
-          placeholder="09:20 AM, 01:30 PM"
-          value={showData.timings}
-          onChange={handleChange}
-          className="bg-white/[0.04] border border-white/10 rounded-2xl px-5 py-4 outline-none md:col-span-2"
-        />
+        <div className="md:col-span-2 xl:col-span-3">
+
+          <label className="block text-gray-300 mb-4 font-semibold text-lg">
+            Select Show Timings
+          </label>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+
+            {[
+              "09:00 AM",
+              "10:30 AM",
+              "12:00 PM",
+              "01:30 PM",
+              "03:00 PM",
+              "04:30 PM",
+              "06:00 PM",
+              "07:30 PM",
+              "09:00 PM",
+              "10:30 PM",
+            ].map((time) => {
+
+              const isSelected =
+                showData.timings.includes(
+                  time
+                );
+
+              return (
+                <button
+                  type="button"
+                  key={time}
+                  onClick={() =>
+                    handleTimingSelect(
+                      time
+                    )
+                  }
+                  className={`px-5 py-4 rounded-2xl border transition-all duration-300 font-semibold ${
+                    isSelected
+                      ? "bg-[#FF4D00] border-[#FF4D00] text-white shadow-[0_0_25px_rgba(255,77,0,0.35)]"
+                      : "bg-white/[0.04] border-white/10 text-gray-300 hover:border-[#FF4D00]/40"
+                  }`}
+                >
+                  {time}
+                </button>
+              );
+            })}
+
+          </div>
+        </div>
 
         {/* BUTTON */}
         <button className="group relative overflow-hidden flex items-center justify-center gap-3 bg-[#FF4D00] px-6 py-4 rounded-2xl font-semibold shadow-[0_0_20px_rgba(255,77,0,0.35)] transition-all duration-300 hover:scale-[1.02] hover:shadow-[0_0_35px_rgba(255,77,0,0.55)] xl:col-span-3">
@@ -300,8 +405,12 @@ const ManageShows = () => {
 
               {/* POSTER */}
               <img
-                src={show?.movie?.poster}
-                alt={show?.movie?.title}
+                src={
+                  show?.movie?.poster
+                }
+                alt={
+                  show?.movie?.title
+                }
                 className="w-[110px] h-[160px] rounded-2xl object-cover"
               />
 
@@ -309,7 +418,9 @@ const ManageShows = () => {
               <div className="flex-1">
 
                 <h2 className="text-3xl font-black">
-                  {show?.movie?.title}
+                  {
+                    show?.movie?.title
+                  }
                 </h2>
 
                 {/* THEATER */}
@@ -415,6 +526,5 @@ const ManageShows = () => {
       </div>
     </section>
   );
-};
-
+}
 export default ManageShows;
