@@ -23,6 +23,8 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import ManageMovies from "./pages/admin/ManageMovies";
 import AddMovie from "./pages/admin/AddMovie";
 import AdminProfile from "./pages/admin/AdminProfile";
+import ManageBookings from "./pages/admin/ManageBookings";
+import ManageShows from "./pages/admin/ManageShows";
 
 export const serverUrl = "http://localhost:8000";
 
@@ -89,14 +91,15 @@ const App = () => {
           <Route
             path="bookings"
             element={
-              <h1 className="text-white text-5xl font-black">Bookings</h1>
+              // <h1 className="text-white text-5xl font-black">Bookings</h1>
+              <ManageBookings />
             }
           />
 
           {/* SHOWS */}
           <Route
             path="shows"
-            element={<h1 className="text-white text-5xl font-black">Shows</h1>}
+            element={<ManageShows />}
           />
         </Route>
       </Routes>

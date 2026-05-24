@@ -17,65 +17,32 @@ const FeaturedSection = () => {
     fetchMovies();
   }, []);
 
- const fetchMovies = async () => {
-  try {
-
-    // DATABASE MOVIES
-    let dbMovies = [];
-
+  const fetchMovies = async () => {
     try {
+      // DATABASE MOVIES
+      let dbMovies = [];
 
-      const { data } =
-        await axios.get(
-          `${serverUrl}/api/movies`
-        );
+      try {
+        const { data } = await axios.get(`${serverUrl}/api/movies`);
 
-      dbMovies = data;
+        dbMovies = data;
+      } catch (error) {
+        console.log("DB Error", error);
+      }
 
-    } catch (error) {
+      // OMDB MOVIES
+      const movieNames = ["Dhurandhar", "Animal", "Jawan", "RRR"];
 
-      console.log(
-        "DB Error",
-        error
-      );
-    }
-
-    // OMDB MOVIES
-    const movieNames = [
-      "Dhurandhar",
-      "Animal",
-      "Jawan",
-      "RRR",
-    ];
-
-    const requests =
-      movieNames.map((movie) =>
-        axios.get(
-          `https://www.omdbapi.com/?apikey=${API_KEY}&t=${movie}`
-        )
+      const requests = movieNames.map((movie) =>
+        axios.get(`https://www.omdbapi.com/?apikey=${API_KEY}&t=${movie}`),
       );
 
-    const responses =
-      await Promise.allSettled(
-        requests
-      );
+      const responses = await Promise.allSettled(requests);
 
-    const omdbMovies =
-      responses
-        .filter(
-          (res) =>
-            res.status ===
-            "fulfilled"
-        )
-        .map(
-          (res) =>
-            res.value.data
-        )
-        .filter(
-          (movie) =>
-            movie.Response !==
-            "False"
-        )
+      const omdbMovies = responses
+        .filter((res) => res.status === "fulfilled")
+        .map((res) => res.value.data)
+        .filter((movie) => movie.Response !== "False")
         .map((movie) => ({
           _id: movie.imdbID,
 
@@ -83,34 +50,35 @@ const FeaturedSection = () => {
 
           poster: movie.Poster,
 
-          language:
-            movie.Language,
+          language: movie.Language,
 
-          duration:
-            movie.Runtime,
+          duration: movie.Runtime,
 
-          genre: movie.Genre
-            ? movie.Genre.split(
-                ","
-              )
-            : [],
+          genre: movie.Genre ? movie.Genre.split(",") : [],
 
-          description:
-            movie.Plot,
+          description: movie.Plot,
         }));
+      console.log(omdbMovies);
 
-    // COMBINE
-    setMovies([
-      ...dbMovies,
-      ...omdbMovies,
-    ].slice(0, 4));
+      // COMBINE
+      const mergedMovies = [...dbMovies, ...omdbMovies];
 
-  } catch (error) {
+      // REMOVE DUPLICATES
+      const uniqueMovies = mergedMovies.filter(
+        (movie, index, self) =>
+          index ===
+          self.findIndex(
+            (m) =>
+              (m.title || m.Title)?.toLowerCase() ===
+              (movie.title || movie.Title)?.toLowerCase(),
+          ),
+      );
 
-    console.log(error);
-
-  }
-};
+      setMovies(uniqueMovies.slice(0, 4));
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <section className="relative py-24 px-6 md:px-16 bg-[#0A0A0A] overflow-hidden">

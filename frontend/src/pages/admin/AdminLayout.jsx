@@ -132,10 +132,10 @@ const AdminLayout = () => {
   ];
 
   return (
-    <section className="min-h-screen bg-[#0A0A0A] text-white flex overflow-hidden">
+    <section className="h-screen bg-[#0A0A0A] text-white flex overflow-hidden">
 
       {/* SIDEBAR */}
-      <div className="w-[290px] bg-white/[0.03] border-r border-white/10 backdrop-blur-xl flex flex-col justify-between p-6">
+     <div className="w-[290px] h-screen sticky top-0 bg-white/[0.03] border-r border-white/10 backdrop-blur-xl flex flex-col justify-between p-6 flex-shrink-0">
 
         <div>
 
@@ -289,7 +289,7 @@ const AdminLayout = () => {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 overflow-y-auto relative">
+      <div className="flex-1 h-screen overflow-y-auto relative">
 
         {/* ORANGE GLOW */}
         <div className="absolute top-0 right-0 w-[350px] h-[350px] bg-[#FF4D00]/10 blur-[120px] rounded-full" />

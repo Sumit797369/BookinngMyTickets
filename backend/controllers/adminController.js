@@ -53,3 +53,33 @@ export const getDashboardData =
       });
     }
   };
+
+  export const getAllBookings =
+  async (req, res) => {
+    try {
+
+      const bookings =
+        await Booking.find()
+          .populate(
+            "movie"
+          )
+          .populate(
+            "user",
+            "name email"
+          )
+          .sort({
+            createdAt: -1,
+          });
+
+      return res
+        .status(200)
+        .json(bookings);
+
+    } catch (error) {
+
+      return res.status(500).json({
+        message:
+          error.message,
+      });
+    }
+  };
