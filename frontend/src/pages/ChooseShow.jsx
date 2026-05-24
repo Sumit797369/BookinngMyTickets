@@ -36,31 +36,31 @@ const ChooseShow = () => {
   const dates = [
     {
       day: "TUE",
-      date: "19",
+      date: "23",
       month: "MAY",
     },
 
     {
       day: "WED",
-      date: "20",
+      date: "24",
       month: "MAY",
     },
 
     {
       day: "THU",
-      date: "21",
+      date: "25",
       month: "MAY",
     },
 
     {
       day: "FRI",
-      date: "22",
+      date: "26",
       month: "MAY",
     },
 
     {
       day: "SAT",
-      date: "23",
+      date: "27",
       month: "MAY",
     },
   ];

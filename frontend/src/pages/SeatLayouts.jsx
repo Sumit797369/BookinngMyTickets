@@ -1,33 +1,43 @@
-import React, { useEffect, useMemo, useState } from "react";
+// pages/SeatLayouts.jsx
+
+import React, { useEffect, useState } from "react";
+
 import { Clock3 } from "lucide-react";
+
 import { useLocation, useNavigate, useParams } from "react-router-dom";
+
 import toast from "react-hot-toast";
-import { serverUrl } from "../App";
+
 import axios from "axios";
 
-
+import { serverUrl } from "../App";
 
 const SeatLayouts = () => {
   const navigate = useNavigate();
 
-  const { seats } = useParams();
+  const { seats, date } = useParams();
 
   const location = useLocation();
 
   const { theater, movie } = location.state || {};
 
-  // Current Timing
+  // CURRENT TIME
   const initialTime = decodeURIComponent(seats || "").trim();
 
   const [selectedTime, setSelectedTime] = useState(initialTime);
-  // Selected Seats
+
+  // SELECTED SEATS
   const [selectedSeats, setSelectedSeats] = useState([]);
 
-  // Loading
+  // BOOKED SEATS
+  const [bookedSeats, setBookedSeats] = useState([]);
+
+  // LOADING
   const [loading, setLoading] = useState(false);
 
   const [pageLoading, setPageLoading] = useState(true);
 
+  // PAGE LOADER
   useEffect(() => {
     const timer = setTimeout(() => {
       setPageLoading(false);
@@ -36,7 +46,56 @@ const SeatLayouts = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // Timings
+  // FETCH BOOKED SEATS
+  useEffect(() => {
+    fetchBookedSeats();
+  }, [movie, selectedTime]);
+
+  const fetchBookedSeats = async () => {
+    try {
+      if (!movie) return;
+
+      let movieId = movie?._id;
+
+      // IF OMDB MOVIE
+      if (movie?._id?.startsWith("tt")) {
+        const { data } = await axios.post(
+          `${serverUrl}/api/movies/create-omdb`,
+          {
+            title: movie.title,
+
+            description: movie.description,
+
+            poster: movie.poster,
+
+            language: movie.language,
+
+            duration: movie.duration,
+
+            genre: movie.genre,
+          },
+        );
+
+        movieId = data._id;
+      }
+      const { data } = await axios.get(
+        `${serverUrl}/api/bookings/booked-seats/${movieId}`,
+        {
+          params: {
+            date,
+
+            time: selectedTime,
+          },
+        },
+      );
+
+      setBookedSeats(data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // TIMINGS
   const timings = [
     "09:20 AM",
     "01:30 PM",
@@ -45,104 +104,20 @@ const SeatLayouts = () => {
     "10:30 AM",
     "07:00 PM",
   ].map((time) => time.trim());
-  // Different booked seats according to timing
-  const bookedSeats = useMemo(() => {
-    // Morning show
-    if (selectedTime.includes("09") || selectedTime.includes("10")) {
-      return ["C8", "D8", "E5"];
-    }
 
-    // Afternoon
-    if (selectedTime.includes("01") || selectedTime.includes("04")) {
-      return ["A3", "B5", "C8", "D8", "F4", "G7"];
-    }
+  // SEAT LAYOUT
+  const rows = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
-    // Evening/Night
-    return [
-      "A2",
-      "A3",
-      "A5",
-      "B4",
-      "B5",
-      "C7",
-      "C8",
-      "D8",
-      "D9",
-      "E4",
-      "F3",
-      "F7",
-      "G5",
-      "H8",
-      "I4",
-      "J7",
-    ];
-  }, [selectedTime]);
-
-  // Seat Layout
-  const rows = [
-    {
-      row: "A",
-      seats: 9,
-    },
-
-    {
-      row: "B",
-      seats: 9,
-    },
-
-    {
-      row: "C",
-      seats: 9,
-    },
-
-    {
-      row: "D",
-      seats: 9,
-    },
-
-    {
-      row: "E",
-      seats: 9,
-    },
-
-    {
-      row: "F",
-      seats: 9,
-    },
-
-    {
-      row: "G",
-      seats: 9,
-    },
-
-    {
-      row: "H",
-      seats: 9,
-    },
-
-    {
-      row: "I",
-      seats: 9,
-    },
-
-    {
-      row: "J",
-      seats: 9,
-    },
-  ];
-
- 
-
-  // Seat Select
+  // SELECT SEAT
   const handleSeatClick = (seatId) => {
-    // Already booked
+    // ALREADY BOOKED
     if (bookedSeats.includes(seatId)) {
-      toast.error("This seat is already booked");
+      toast.error("This seat has already been booked");
 
       return;
     }
 
-    // Toggle
+    // TOGGLE
     setSelectedSeats((prev) =>
       prev.includes(seatId)
         ? prev.filter((seat) => seat !== seatId)
@@ -150,122 +125,80 @@ const SeatLayouts = () => {
     );
   };
 
-  // Checkout
- const handleCheckout =
-  async () => {
-
-    if (
-      selectedSeats.length === 0
-    ) {
-      toast.error(
-        "Please select seats"
-      );
+  // CHECKOUT
+  const handleCheckout = async () => {
+    if (selectedSeats.length === 0) {
+      toast.error("Please select seats");
 
       return;
     }
 
     try {
-
       setLoading(true);
 
-      let finalMovieId =
-        movie?._id;
+      let finalMovieId = movie?._id;
 
-      // IF OMDB MOVIE
-      if (
-        movie?._id?.startsWith(
-          "tt"
-        )
-      ) {
+      // OMDB MOVIE
+      if (movie?._id?.startsWith("tt")) {
+        const { data } = await axios.post(
+          `${serverUrl}/api/movies/create-omdb`,
+          {
+            title: movie.title,
 
-        const { data } =
-          await axios.post(
-            `${serverUrl}/api/movies/create-omdb`,
-            {
-              title:
-                movie.title,
+            description: movie.description,
 
-              description:
-                movie.description,
+            poster: movie.poster,
 
-              poster:
-                movie.poster,
+            language: movie.language,
 
-              language:
-                movie.language,
+            duration: movie.duration,
 
-              duration:
-                movie.duration,
+            genre: movie.genre,
+          },
+        );
 
-              genre:
-                movie.genre,
-            }
-          );
-
-        finalMovieId =
-          data._id;
+        finalMovieId = data._id;
       }
 
-      // CREATE BOOKING
+      // BOOK TICKETS
       await axios.post(
         `${serverUrl}/api/bookings/book`,
         {
           showId: null,
 
-          movieId:
-            finalMovieId,
+          movieId: finalMovieId,
 
-          seats:
-            selectedSeats,
+          seats: selectedSeats,
 
-          amount:
-            selectedSeats.reduce(
-              (total, seat) =>
-                seat.startsWith(
-                  "R"
-                )
-                  ? total + 500
-                  : total + 250,
-              0
-            ),
+          amount: selectedSeats.reduce(
+            (total, seat) => (seat.startsWith("R") ? total + 500 : total + 250),
+            0,
+          ),
 
           theater,
 
-          date:
-            new Date().toLocaleDateString(),
+          date,
 
-          time:
-            selectedTime,
+          time: selectedTime,
         },
         {
           withCredentials: true,
-        }
+        },
       );
 
-      toast.success(
-        "Tickets booked successfully 🍿"
-      );
+      toast.success("Tickets booked successfully 🍿");
 
-      navigate(
-        "/my-bookings"
-      );
-
+      navigate("/my-bookings");
     } catch (error) {
-
       console.log(error);
 
-      toast.error(
-        error.response?.data
-          ?.message ||
-          "Booking failed"
-      );
-
+      toast.error(error.response?.data?.message || "Booking failed");
     } finally {
-
       setLoading(false);
-
     }
   };
+
+  // PAGE LOADER
   if (pageLoading) {
     return (
       <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
@@ -279,22 +212,23 @@ const SeatLayouts = () => {
       </div>
     );
   }
+
   return (
     <section className="min-h-screen bg-[#0A0A0A] text-white relative overflow-hidden pt-28 pb-20 px-4 md:px-10">
-      {/* Orange Glow */}
+      {/* ORANGE GLOW */}
       <div className="absolute top-0 left-0 w-[450px] h-[450px] bg-[#FF4D00]/10 blur-[140px] rounded-full" />
 
-      {/* Red Glow */}
+      {/* RED GLOW */}
       <div className="absolute bottom-0 right-0 w-[450px] h-[450px] bg-[#E61919]/10 blur-[140px] rounded-full" />
 
       <div className="relative z-10">
-        {/* Top */}
+        {/* TOP */}
         <div className="flex flex-col lg:flex-row gap-10">
-          {/* Sidebar */}
+          {/* SIDEBAR */}
           <div className="w-full lg:w-[280px] bg-white/[0.03] border border-white/10 rounded-3xl p-6 h-fit backdrop-blur-xl">
             <h2 className="text-2xl font-bold">Available Timings</h2>
 
-            {/* Timings */}
+            {/* TIMINGS */}
             <div className="space-y-4 mt-8">
               {timings.map((time, index) => (
                 <button
@@ -313,7 +247,7 @@ const SeatLayouts = () => {
               ))}
             </div>
 
-            {/* Legend */}
+            {/* LEGEND */}
             <div className="mt-10 space-y-5">
               <div className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded bg-[#FF4D00]" />
@@ -328,23 +262,23 @@ const SeatLayouts = () => {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded bg-gray-600" />
+                <div className="w-5 h-5 rounded bg-gray-700" />
 
                 <span className="text-gray-300">Booked</span>
               </div>
             </div>
           </div>
 
-          {/* Main */}
+          {/* MAIN */}
           <div className="flex-1 max-w-[1200px] mx-auto">
-            {/* Movie */}
+            {/* MOVIE */}
             <div className="mb-10">
               <h1 className="text-4xl font-black">{movie?.title}</h1>
 
               <p className="text-gray-400 mt-2">{theater}</p>
             </div>
 
-            {/* Screen */}
+            {/* SCREEN */}
             <div className="flex flex-col items-center mb-16">
               <div className="w-full max-w-4xl h-16 rounded-t-[100%] border-t-[8px] border-[#FF4D00]/70" />
 
@@ -353,13 +287,15 @@ const SeatLayouts = () => {
               </p>
             </div>
 
-            {/* Seats */}
+            {/* SEATS */}
             <div className="overflow-x-auto">
               <div className="w-full flex flex-col items-center gap-8">
-                {/* Regular Rows */}
-                {["A", "B", "C", "D", "E", "F"].map((row, rowIndex) => (
-                  <div key={rowIndex} className="flex items-center justify-center gap-6 xl:gap-12">
-                    {/* LEFT BLOCK */}
+                {rows.map((row, rowIndex) => (
+                  <div
+                    key={rowIndex}
+                    className="flex items-center justify-center gap-6 xl:gap-12"
+                  >
+                    {/* LEFT */}
                     <div className="flex gap-3">
                       {Array.from({
                         length: 10,
@@ -376,7 +312,7 @@ const SeatLayouts = () => {
                             onClick={() => handleSeatClick(seatId)}
                             className={`w-8 h-8 md:w-10 md:h-10 rounded-lg border text-sm font-semibold transition-all duration-300 ${
                               isBooked
-                                ? "bg-gray-700 border-gray-700 text-white/70"
+                                ? "bg-gray-700 border-gray-700 text-white/70 cursor-not-allowed"
                                 : isSelected
                                   ? "bg-[#FF4D00] border-[#FF4D00] text-white shadow-[0_0_25px_rgba(255,77,0,0.45)] scale-110"
                                   : "bg-transparent border-[#FF4D00]/70 text-white hover:bg-[#FF4D00]/10 hover:scale-105"
@@ -388,7 +324,7 @@ const SeatLayouts = () => {
                       })}
                     </div>
 
-                    {/* RIGHT BLOCK */}
+                    {/* RIGHT */}
                     <div className="flex gap-3">
                       {Array.from({
                         length: 10,
@@ -405,7 +341,7 @@ const SeatLayouts = () => {
                             onClick={() => handleSeatClick(seatId)}
                             className={`w-8 h-8 md:w-10 md:h-10 rounded-lg border text-sm font-semibold transition-all duration-300 ${
                               isBooked
-                                ? "bg-gray-700 border-gray-700 text-white/70"
+                                ? "bg-gray-700 border-gray-700 text-white/70 cursor-not-allowed"
                                 : isSelected
                                   ? "bg-[#FF4D00] border-[#FF4D00] text-white shadow-[0_0_25px_rgba(255,77,0,0.45)] scale-110"
                                   : "bg-transparent border-[#FF4D00]/70 text-white hover:bg-[#FF4D00]/10 hover:scale-105"
@@ -418,78 +354,12 @@ const SeatLayouts = () => {
                     </div>
                   </div>
                 ))}
-
-                {/* Recliner Section */}
-                <div className="mt-14 flex flex-wrap items-center justify-center gap-10">
-                  {/* Recliner Left */}
-                  <div className="flex gap-5">
-                    {Array.from({
-                      length: 5,
-                    }).map((_, index) => {
-                      const seatId = `R${index + 1}`;
-
-                      const isBooked = bookedSeats.includes(seatId);
-
-                      const isSelected = selectedSeats.includes(seatId);
-
-                      return (
-                        <button
-                          key={seatId}
-                          onClick={() => handleSeatClick(seatId)}
-                          className={`w-20 h-14 md:w-24 md:h-16 rounded-2xl border text-sm font-bold transition-all duration-300 ${
-                            isBooked
-                              ? "bg-gray-700 border-gray-700 text-white/70"
-                              : isSelected
-                                ? "bg-[#FFCC00] border-[#FFCC00] text-black shadow-[0_0_25px_rgba(255,204,0,0.5)] scale-110"
-                                : "bg-white/5 border-[#FFCC00]/70 text-[#FFCC00] hover:bg-[#FFCC00]/10 hover:scale-105"
-                          }`}
-                        >
-                          {seatId}
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Recliner Right */}
-                  <div className="flex gap-5">
-                    {Array.from({
-                      length: 5,
-                    }).map((_, index) => {
-                      const seatId = `R${index + 6}`;
-
-                      const isBooked = bookedSeats.includes(seatId);
-
-                      const isSelected = selectedSeats.includes(seatId);
-
-                      return (
-                        <button
-                          key={seatId}
-                          onClick={() => handleSeatClick(seatId)}
-                          className={`w-24 h-16 rounded-2xl border text-sm font-bold transition-all duration-300 ${
-                            isBooked
-                              ? "bg-gray-700 border-gray-700 text-white/70"
-                              : isSelected
-                                ? "bg-[#FFCC00] border-[#FFCC00] text-black shadow-[0_0_25px_rgba(255,204,0,0.5)] scale-110"
-                                : "bg-white/5 border-[#FFCC00]/70 text-[#FFCC00] hover:bg-[#FFCC00]/10 hover:scale-105"
-                          }`}
-                        >
-                          {seatId}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Recliner Label */}
-                <p className="text-[#FFCC00] font-semibold tracking-[5px] text-sm mt-2">
-                  PREMIUM RECLINERS
-                </p>
               </div>
             </div>
 
-            {/* Bottom */}
+            {/* BOTTOM */}
             <div className="mt-16 w-full bg-white/[0.03] border border-white/10 rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-8">
-              {/* Selected Seats */}
+              {/* SELECTED */}
               <div>
                 <h3 className="text-2xl font-bold">Selected Seats</h3>
 
@@ -500,7 +370,7 @@ const SeatLayouts = () => {
                 </p>
               </div>
 
-              {/* Total */}
+              {/* TOTAL */}
               <div className="text-center">
                 <h2 className="text-5xl font-black text-[#FF4D00]">
                   ₹
@@ -514,7 +384,7 @@ const SeatLayouts = () => {
                 <p className="text-gray-400 mt-2">Total Amount</p>
               </div>
 
-              {/* Checkout */}
+              {/* CHECKOUT */}
               <button
                 onClick={handleCheckout}
                 disabled={loading}
