@@ -160,39 +160,79 @@ const SeatLayouts = () => {
         finalMovieId = data._id;
       }
 
-      // BOOK TICKETS
-      await axios.post(
-        `${serverUrl}/api/bookings/book`,
+      // TOTAL
+      const totalAmount = selectedSeats.reduce(
+        (total, seat) => (seat.startsWith("R") ? total + 500 : total + 250),
+        0,
+      );
+
+      // CREATE ORDER
+      const { data } = await axios.post(
+        `${serverUrl}/api/payment/create-order`,
         {
-          showId: null,
-
-          movieId: finalMovieId,
-
-          seats: selectedSeats,
-
-          amount: selectedSeats.reduce(
-            (total, seat) => (seat.startsWith("R") ? total + 500 : total + 250),
-            0,
-          ),
-
-          theater,
-
-          date,
-
-          time: selectedTime,
-        },
-        {
-          withCredentials: true,
+          amount: totalAmount,
         },
       );
 
-      toast.success("Tickets booked successfully 🍿");
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY,
 
-      navigate("/my-bookings");
+        amount: data.amount,
+
+        currency: data.currency,
+
+        name: "Movie Booking",
+
+        description: "Movie Ticket Booking",
+
+        order_id: data.id,
+
+        handler: async (response) => {
+          // VERIFY PAYMENT
+          await axios.post(
+            `${serverUrl}/api/payment/verify-payment`,
+            {
+              ...response,
+
+              bookingData: {
+                movie: finalMovieId,
+
+                user: null,
+
+                seats: selectedSeats,
+
+                amount: totalAmount,
+
+                theater,
+
+                date,
+
+                time: selectedTime,
+              },
+            },
+            {
+              withCredentials: true,
+            },
+          );
+           fetchBookedSeats();
+           
+          toast.success("Payment successful 🍿");
+
+          navigate("/my-bookings");
+        },
+
+        theme: {
+          color: "#FF4D00",
+        },
+      };
+
+      const razorpay = new window.Razorpay(options);
+
+      razorpay.open();
     } catch (error) {
       console.log(error);
 
-      toast.error(error.response?.data?.message || "Booking failed");
+      toast.error("Payment failed");
     } finally {
       setLoading(false);
     }

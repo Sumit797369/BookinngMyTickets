@@ -31,39 +31,34 @@ const ChooseShow = () => {
   };
 
   // Selected Date
-  const [selectedDate, setSelectedDate] = useState(0);
+  const [selectedDate, setSelectedDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
 
-  const dates = [
-    {
-      day: "TUE",
-      date: "23",
-      month: "MAY",
-    },
+  // DYNAMIC DATES
+  const dates = Array.from({ length: 5 }, (_, index) => {
+    const date = new Date();
 
-    {
-      day: "WED",
-      date: "24",
-      month: "MAY",
-    },
+    date.setDate(date.getDate() + index);
 
-    {
-      day: "THU",
-      date: "25",
-      month: "MAY",
-    },
+    return {
+      fullDate: date.toISOString().split("T")[0],
 
-    {
-      day: "FRI",
-      date: "26",
-      month: "MAY",
-    },
+      day: date
+        .toLocaleDateString("en-US", {
+          weekday: "short",
+        })
+        .toUpperCase(),
 
-    {
-      day: "SAT",
-      date: "27",
-      month: "MAY",
-    },
-  ];
+      date: date.getDate(),
+
+      month: date
+        .toLocaleDateString("en-US", {
+          month: "short",
+        })
+        .toUpperCase(),
+    };
+  });
 
   const theaters = [
     {
@@ -194,9 +189,9 @@ const ChooseShow = () => {
           {dates.map((item, index) => (
             <button
               key={index}
-              onClick={() => setSelectedDate(index)}
+              onClick={() => setSelectedDate(item.fullDate)}
               className={`min-w-[100px] rounded-2xl px-5 py-4 border transition-all duration-300 ${
-                selectedDate === index
+                selectedDate === item.fullDate
                   ? "bg-[#FF4D00] border-[#FF4D00] text-white shadow-[0_0_30px_rgba(255,77,0,0.4)] scale-105"
                   : "bg-white/5 border-white/10 text-gray-300 hover:border-[#FF4D00]/40 hover:bg-white/10"
               }`}

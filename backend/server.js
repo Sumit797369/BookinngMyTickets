@@ -1,13 +1,14 @@
-import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
+import express from "express";
+import cors from "cors";
 import connectDB from "./config/db.js";
 import cookieParser from "cookie-parser";
-import cors from "cors";
 import authRouter from "./routers/auth.route.js";
 import adminRouter from "./routers/admin.routes.js";
 import movieRouter from "./routers/movie.route.js";
 import bookingRouter from "./routers/booking.route.js";
+import paymentRouter from "./routers/payment.route.js";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -25,7 +26,7 @@ app.use("/api/auth", authRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/movies/", movieRouter);
 app.use("/api/bookings", bookingRouter);
-
+app.use("/api/payment", paymentRouter);
 connectDB()
   .then(() => {
     app.listen(port, () => {

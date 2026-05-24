@@ -1,4 +1,8 @@
+// controllers/paymentController.js
+
 import crypto from "crypto";
+
+import jwt from "jsonwebtoken";
 
 import razorpayInstance from "../config/razorpay.js";
 
@@ -8,9 +12,8 @@ export const createOrder =
   async (req, res) => {
     try {
 
-      const {
-        amount,
-      } = req.body;
+      const { amount } =
+        req.body;
 
       const options = {
         amount:
@@ -51,6 +54,7 @@ export const verifyPayment =
         bookingData,
       } = req.body;
 
+      // VERIFY SIGNATURE
       const generatedSignature =
         crypto
           .createHmac(
@@ -76,11 +80,70 @@ export const verifyPayment =
         });
       }
 
+      // GET USER FROM TOKEN
+      const token =
+        req.cookies.token;
+
+      if (!token) {
+
+        return res.status(401).json({
+          message:
+            "Unauthorized",
+        });
+      }
+
+      const decoded =
+        jwt.verify(
+          token,
+          process.env.JWT_SECRET
+        );
+
+      // CHECK ALREADY BOOKED SEATS
+      const existingBookings =
+        await Booking.find({
+          movie:
+            bookingData.movie,
+
+          date:
+            bookingData.date,
+
+          time:
+            bookingData.time,
+        });
+
+      const alreadyBookedSeats =
+        existingBookings.flatMap(
+          (booking) =>
+            booking.seats
+        );
+
+      const seatAlreadyBooked =
+        bookingData.seats.some(
+          (seat) =>
+            alreadyBookedSeats.includes(
+              seat
+            )
+        );
+
+      if (seatAlreadyBooked) {
+
+        return res.status(400).json({
+          message:
+            "This seat has already been booked",
+        });
+      }
+
       // SAVE BOOKING
       const booking =
-        await Booking.create(
-          bookingData
-        );
+        await Booking.create({
+          ...bookingData,
+
+          user:
+            decoded.id,
+
+          paymentStatus:
+            "paid",
+        });
 
       return res.status(201).json({
         success: true,
