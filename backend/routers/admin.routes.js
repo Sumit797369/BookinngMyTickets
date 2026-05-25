@@ -5,9 +5,14 @@ import {
   getDashboardData,
 } from "../controllers/adminController.js";
 
+import { isAdmin } from "../middlewares/authmiddleware.js";
+
 const adminRouter = express.Router();
 
-adminRouter.get("/dashboard", getDashboardData);
-adminRouter.get("/bookings", getAllBookings);
+// DASHBOARD
+adminRouter.get("/dashboard", isAdmin, getDashboardData);
+
+// BOOKINGS
+adminRouter.get("/bookings", isAdmin, getAllBookings);
 
 export default adminRouter;

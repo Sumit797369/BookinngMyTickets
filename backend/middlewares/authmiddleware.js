@@ -1,21 +1,88 @@
-import jwt from "jsonwebtoken"
-// import User from "../models/user"
+import jwt from "jsonwebtoken";
 
-export const isAuth = (req, res, next) => {
-  try {
-    const token = req.cookies.token
+// USER AUTH
+export const isAuth =
+  (req, res, next) => {
+    try {
 
-    if (!token) {
-      return res.status(401).json({ message: "Unauthorized" })
+      const token =
+        req.cookies
+          .userToken;
+
+      if (!token) {
+
+        return res.status(401).json({
+          message:
+            "Unauthorized",
+        });
+      }
+
+      const decoded =
+        jwt.verify(
+          token,
+          process.env
+            .JWT_SECRET
+        );
+
+      req.userId =
+        decoded.id;
+
+      next();
+
+    } catch (error) {
+
+      return res.status(401).json({
+        message:
+          "Invalid token",
+      });
     }
+  };
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+// ADMIN AUTH
+export const isAdmin =
+  (req, res, next) => {
+    try {
 
-    req.userId =decoded.id
+      const token =
+        req.cookies
+          .adminToken;
 
-    next();
+      if (!token) {
 
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid token" })
-  }
-}
+        return res.status(401).json({
+          message:
+            "Admin unauthorized",
+        });
+      }
+
+      const decoded =
+        jwt.verify(
+          token,
+          process.env
+            .JWT_SECRET
+        );
+
+      if (
+        decoded.role !==
+        "admin"
+      ) {
+
+        return res.status(403).json({
+          message:
+            "Access denied",
+        });
+      }
+
+      req.admin =
+        decoded;
+
+      next();
+
+    } catch (error) {
+
+      return res.status(401).json({
+        message:
+          "Invalid admin token",
+      });
+    }
+  };
