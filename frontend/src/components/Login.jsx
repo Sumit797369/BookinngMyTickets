@@ -104,41 +104,40 @@ const Login = ({ open, onClose }) => {
       return toast.error(error);
     }
 
-   try {
-  setErrorMsg("");
+    try {
+      setErrorMsg("");
 
-  const { data } = await axios.post(
-    `${serverUrl}/api/auth/login`,
-    {
-      email,
-      password,
-    },
-    {
-      withCredentials: true,
-    },
-  );
+      const { data } = await axios.post(
+        `${serverUrl}/api/auth/login`,
+        {
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        },
+      );
 
- 
+      // BLOCK ADMINS
+      if (data.role === "admin" || data.role === "owner") {
+        toast.error("Please login from admin panel");
 
-  toast.success(
-    "Logged in successfully!"
-  );
+        return;
+      }
 
-  window.location.reload();
+      toast.success("Logged in successfully!");
 
-  onClose();
+      window.location.reload();
 
-} catch (error) {
+      onClose();
+    } catch (error) {
+      const message = error.response?.data?.message || "Login failed";
 
-  const message =
-    error.response?.data?.message ||
-    "Login failed";
+      setErrorMsg(message);
 
-  setErrorMsg(message);
-
-  toast.error(message);
-}
-  }
+      toast.error(message);
+    }
+  };
 
   // Signup
   const handleSignup = async () => {
@@ -358,6 +357,6 @@ const Login = ({ open, onClose }) => {
       </div>
     </div>
   );
-}
+};
 
-export default Login
+export default Login;

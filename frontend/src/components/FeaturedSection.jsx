@@ -31,7 +31,7 @@ const FeaturedSection = () => {
       }
 
       // OMDB MOVIES
-      const movieNames = ["Dhurandhar", "Animal", "Jawan", "RRR"];
+      const movieNames = [ "Animal", "Jawan", "RRR"];
 
       const requests = movieNames.map((movie) =>
         axios.get(`https://www.omdbapi.com/?apikey=${API_KEY}&t=${movie}`),

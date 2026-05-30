@@ -13,13 +13,31 @@ const Navbar = () => {
   const [user, setUser] = useState(null);
   const profileRef = useRef();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [search, setSearch] = useState("");
+
+  const [movies, setMovies] = useState([]);
 
   const navLinks = [
     { name: "Home", path: "/" },
+
     { name: "Movies", path: "/movies" },
-    { name: "Theaters", path: "/theaters" },
-    { name: "Releases", path: "/releases" },
-    { name: "Favorites", path: "/favorite" },
+
+    ...(user
+      ? [
+          {
+            name: "My Bookings",
+
+            path: "/my-bookings",
+          },
+        ]
+      : []),
+
+    {
+      name: "Favorites",
+
+      path: "/favorite",
+    },
   ];
 
   useEffect(() => {
@@ -37,6 +55,58 @@ const Navbar = () => {
 
     fetchUser();
 
+    const fetchMovies = async () => {
+      try {
+        // DATABASE MOVIES
+        const { data } = await axios.get(`${serverUrl}/api/movies`);
+
+        // OMDB MOVIES
+        const movieNames = [
+          "Dhurandhar",
+          "Dhurandhar The Revenge",
+          "Bhooth Bangla",
+          "Michael",
+          "Drishyam 3",
+          "Mortal Kombat II",
+          "The Devil Wears Prada 2",
+          "Jawan",
+          "Animal",
+          "Pathaan",
+          "RRR",
+          "Leo",
+          "Salaar",
+        ];
+
+        const API_KEY = "fa568b78";
+
+        const requests = movieNames.map((movie) =>
+          axios.get(`https://www.omdbapi.com/?apikey=${API_KEY}&t=${movie}`),
+        );
+
+        const responses = await Promise.allSettled(requests);
+
+        const omdbMovies = responses
+          .filter((res) => res.status === "fulfilled")
+          .map((res) => res.value.data)
+          .filter((movie) => movie.Response !== "False")
+          .map((movie) => ({
+            _id: movie.imdbID,
+
+            title: movie.Title,
+
+            poster: movie.Poster,
+
+            language: movie.Language,
+          }));
+
+        // COMBINE BOTH
+        setMovies([...data, ...omdbMovies]);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchMovies();
+
     const handleClickOutside = (event) => {
       if (profileRef.current && !profileRef.current.contains(event.target)) {
         setShowProfileMenu(false);
@@ -50,11 +120,15 @@ const Navbar = () => {
     };
   }, []);
 
+  const filteredMovies = movies.filter((movie) =>
+    movie.title?.toLowerCase().includes(search.toLowerCase()),
+  );
+
   return (
     <>
       <nav className="w-full bg-[#0A0A0A]  shadow-[0_10px_25px_rgba(255,77,0,0.18)] overflow-visible sticky top-0 z-[9999] border-b-4 border-[#FF4D00]">
         {/* Glow Line */}
-        <div  />
+        <div />
 
         <div className="flex items-center justify-between px-5 md:px-10 py-4">
           {/* Logo */}
@@ -99,9 +173,66 @@ const Navbar = () => {
           {/* Right Side */}
           <div className="flex items-center gap-4">
             {/* Search */}
-            <button className="text-white hover:text-[#FF4D00] transition-all duration-300">
-              <Search size={24} />
-            </button>
+            <div className="relative">
+              {/* SEARCH BUTTON */}
+              <button
+                onClick={() => setSearchOpen(!searchOpen)}
+                className="text-white hover:text-[#FF4D00] transition-all duration-300"
+              >
+                <Search size={24} />
+              </button>
+
+              {/* SEARCH BOX */}
+              {searchOpen && (
+                <div className="absolute top-12 right-0 w-80 bg-[#111] border border-[#FF4D00]/30 rounded-2xl p-4 shadow-[0_0_20px_rgba(255,77,0,0.2)] z-50">
+                  <input
+                    type="text"
+                    placeholder="Search movies..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full bg-[#1A1A1A] text-white px-4 py-3 rounded-xl outline-none border border-white/10 focus:border-[#FF4D00]"
+                  />
+
+                  {/* RESULTS */}
+                  <div className="mt-4 max-h-72 overflow-y-auto flex flex-col gap-2">
+                    {filteredMovies.slice(0, 6).map((movie) => (
+                      <Link
+                        key={movie._id}
+                        to={`/movies/${movie._id}`}
+                        onClick={() => {
+                          setSearchOpen(false);
+
+                          setSearch("");
+                        }}
+                        className="flex items-center gap-3 p-2 rounded-xl hover:bg-[#FF4D00]/10 transition-all duration-300"
+                      >
+                        <img
+                          src={movie.poster}
+                          alt={movie.title}
+                          className="w-12 h-16 object-cover rounded-lg"
+                        />
+
+                        <div>
+                          <h3 className="text-white font-semibold">
+                            {movie.title}
+                          </h3>
+
+                          <p className="text-gray-400 text-sm">
+                            {movie.language}
+                          </p>
+                        </div>
+                      </Link>
+                    ))}
+
+                    {search && filteredMovies.length === 0 && (
+                      <p className="text-gray-400 text-center py-4">
+                        No movies found
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Login/Profile */}
             {user ? (

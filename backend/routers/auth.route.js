@@ -7,6 +7,7 @@ import {
   getMe,
   updateProfile,
   updateAvatar,
+  checkAdmin,
 } from "../controllers/auth.js";
 import upload from "../middlewares/upload.js";
 
@@ -20,6 +21,7 @@ authRouter.get("/logout", logOut);
 authRouter.put("/update-avatar", upload.single("avatar"), updateAvatar);
 
 authRouter.put("/update-profile", updateProfile);
+authRouter.get("/check-admin", checkAdmin);
 authRouter.get("/me", getMe);
 
 export default authRouter;

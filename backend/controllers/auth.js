@@ -81,6 +81,8 @@ export const login = async (req, res) => {
     if (admin) {
       const token = jwt.sign(
         {
+          id: admin.email,
+
           email: admin.email,
 
           role: "admin",
@@ -177,139 +179,103 @@ export const login = async (req, res) => {
 };
 
 // GOOGLE AUTH
-export const googleAuth =
-  async (req, res) => {
-    try {
+export const googleAuth = async (req, res) => {
+  try {
+    const { name, email, avatar } = req.body;
 
-      const {
-        name,
-        email,
-        avatar,
-      } = req.body;
-
-      if (!email) {
-
-        return res.status(400).json({
-          message:
-            "Email is required",
-        });
-      }
-
-      let user =
-        await User.findOne({
-          email,
-        });
-
-      // CREATE USER
-      if (!user) {
-
-        user =
-          await User.create({
-            name,
-
-            email,
-
-            avatar,
-
-            provider:
-              "google",
-          });
-
-      } else {
-
-        // UPDATE USER
-        if (!user.avatar) {
-
-          user.avatar =
-            avatar;
-        }
-
-        if (!user.name) {
-
-          user.name =
-            name;
-        }
-
-        user.provider =
-          "google";
-
-        await user.save();
-      }
-
-      // TOKEN
-      const token =
-        jwt.sign(
-          {
-            id: user._id,
-
-            role:
-              user.role,
-          },
-          process.env
-            .JWT_SECRET,
-          {
-            expiresIn:
-              "7d",
-          }
-        );
-
-      // USER COOKIE
-      res.cookie(
-        "userToken",
-        token,
-        {
-          httpOnly: true,
-
-          secure:
-            process.env
-              .NODE_ENV ===
-            "production",
-
-          sameSite:
-            "strict",
-
-          maxAge:
-            7 *
-            24 *
-            60 *
-            60 *
-            1000,
-        }
-      );
-
-      return res.status(200).json({
-        id: user._id,
-
-        name:
-          user.name,
-
-        email:
-          user.email,
-
-        avatar:
-          user.avatar,
-
-        role:
-          user.role,
-      });
-
-    } catch (error) {
-
-      console.log(error);
-
-      return res.status(500).json({
-        message:
-          `Google auth error ${error}`,
+    if (!email) {
+      return res.status(400).json({
+        message: "Email is required",
       });
     }
-  };
 
+    let user = await User.findOne({
+      email,
+    });
+
+    // CREATE USER
+    if (!user) {
+      user = await User.create({
+        name,
+
+        email,
+
+        avatar,
+
+        provider: "google",
+      });
+    } else {
+      // UPDATE USER
+      if (!user.avatar) {
+        user.avatar = avatar;
+      }
+
+      if (!user.name) {
+        user.name = name;
+      }
+
+      user.provider = "google";
+
+      await user.save();
+    }
+
+    // TOKEN
+    const token = jwt.sign(
+      {
+        id: user._id,
+
+        role: user.role,
+      },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "7d",
+      },
+    );
+
+    // USER COOKIE
+    res.cookie("userToken", token, {
+      httpOnly: true,
+
+      secure: process.env.NODE_ENV === "production",
+
+      sameSite: "strict",
+
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      id: user._id,
+
+      name: user.name,
+
+      email: user.email,
+
+      avatar: user.avatar,
+
+      role: user.role,
+    });
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json({
+      message: `Google auth error ${error}`,
+    });
+  }
+};
+
+// LOGOUT
 // LOGOUT
 export const logOut = async (req, res) => {
   try {
-    res.clearCookie("userToken");
+    // USER LOGOUT
+    if (req.cookies.userToken) {
+      res.clearCookie("userToken");
+    }
 
-    res.clearCookie("adminToken");
+    // ADMIN LOGOUT
+    if (req.cookies.adminToken) {
+      res.clearCookie("adminToken");
+    }
 
     return res.status(200).json({
       message: "Logged out successfully",
@@ -324,32 +290,6 @@ export const logOut = async (req, res) => {
 // GET ME
 export const getMe = async (req, res) => {
   try {
-    // ADMIN
-    const adminToken = req.cookies.adminToken;
-
-    if (adminToken) {
-      const decoded = jwt.verify(adminToken, process.env.JWT_SECRET);
-
-      let adminName = "Admin";
-
-      if (decoded.email.includes("pvr")) {
-        adminName = "PVR Admin";
-      } else if (decoded.email.includes("inox")) {
-        adminName = "INOX Admin";
-      } else if (decoded.email.includes("cinepolis")) {
-        adminName = "Cinepolis Admin";
-      }
-
-      return res.status(200).json({
-        name: adminName,
-
-        email: decoded.email,
-
-        role: "admin",
-      });
-    }
-
-    // USER
     const userToken = req.cookies.userToken;
 
     if (!userToken) {
@@ -376,126 +316,112 @@ export const getMe = async (req, res) => {
   }
 };
 
+// CHECK ADMIN
+export const checkAdmin = async (req, res) => {
+  try {
+    const token = req.cookies.adminToken;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Admin unauthorized",
+      });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    if (decoded.role !== "admin") {
+      return res.status(403).json({
+        message: "Access denied",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+
+      role: "admin",
+    });
+  } catch (error) {
+    return res.status(401).json({
+      message: "Invalid admin token",
+    });
+  }
+};
+
 // UPDATE PROFILE
-export const updateProfile =
-  async (req, res) => {
-    try {
+export const updateProfile = async (req, res) => {
+  try {
+    const token = req.cookies.userToken;
 
-      const token =
-        req.cookies
-          .userToken;
+    if (!token) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
 
-      if (!token) {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        return res.status(401).json({
-          message:
-            "Unauthorized",
-        });
-      }
+    const { name, avatar } = req.body;
 
-      const decoded =
-        jwt.verify(
-          token,
-          process.env
-            .JWT_SECRET
-        );
-
-      const {
+    const user = await User.findByIdAndUpdate(
+      decoded.id,
+      {
         name,
         avatar,
-      } = req.body;
+      },
+      {
+        new: true,
+      },
+    ).select("-password");
 
-      const user =
-        await User.findByIdAndUpdate(
-          decoded.id,
-          {
-            name,
-            avatar,
-          },
-          {
-            new: true,
-          }
-        ).select(
-          "-password"
-        );
-
-      return res.status(200).json(
-        user
-      );
-
-    } catch (error) {
-
-      return res.status(500).json({
-        message:
-          error.message,
-      });
-    }
-  };
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 // UPDATE AVATAR
-export const updateAvatar =
-  async (req, res) => {
-    try {
+export const updateAvatar = async (req, res) => {
+  try {
+    const token = req.cookies.userToken;
 
-      const token =
-        req.cookies
-          .userToken;
-
-      if (!token) {
-
-        return res.status(401).json({
-          message:
-            "Unauthorized",
-        });
-      }
-
-      const decoded =
-        jwt.verify(
-          token,
-          process.env
-            .JWT_SECRET
-        );
-
-      const user =
-        await User.findById(
-          decoded.id
-        );
-
-      if (!user) {
-
-        return res.status(404).json({
-          message:
-            "User not found",
-        });
-      }
-
-      if (!req.file) {
-
-        return res.status(400).json({
-          message:
-            "No file uploaded",
-        });
-      }
-
-      const avatarUrl =
-        `http://localhost:8000/uploads/${req.file.filename}`;
-
-      user.avatar =
-        avatarUrl;
-
-      await user.save();
-
-      return res.status(200).json({
-        success: true,
-
-        user,
-      });
-
-    } catch (error) {
-
-      return res.status(500).json({
-        message:
-          error.message,
+    if (!token) {
+      return res.status(401).json({
+        message: "Unauthorized",
       });
     }
-  };
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "No file uploaded",
+      });
+    }
+
+    const avatarUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+
+    user.avatar = avatarUrl;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+
+      user,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};

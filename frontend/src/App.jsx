@@ -9,7 +9,7 @@ import MyBookings from "./pages/MyBookings";
 import Favorite from "./pages/Favorite";
 import Home from "./pages/Home";
 import Profile from "./pages/Profile";
-import ChooseShow from "./pages/ChooseShow";
+// import ChooseShow from "./pages/ChooseShow";
 
 import { Toaster } from "react-hot-toast";
 
@@ -53,9 +53,9 @@ const App = () => {
 
         <Route path="/movies/:id" element={<MovieDetails />} />
 
-        <Route path="/movie/:id/shows/:date" element={<ChooseShow />} />
+        {/* <Route path="/movie/:id/shows/:date" element={<ChooseShow />} /> */}
 
-        <Route path="/movie/:id/shows/:date/:seats" element={<SeatLayouts />} />
+        <Route path="/seat-layout/:date/:seats" element={<SeatLayouts />} />
 
         <Route path="/my-bookings" element={<MyBookings />} />
 
@@ -97,10 +97,7 @@ const App = () => {
           />
 
           {/* SHOWS */}
-          <Route
-            path="shows"
-            element={<ManageShows />}
-          />
+          <Route path="shows" element={<ManageShows />} />
         </Route>
       </Routes>
 

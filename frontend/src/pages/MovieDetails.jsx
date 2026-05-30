@@ -183,7 +183,12 @@ const MovieDetails = () => {
       return;
     }
 
-    navigate(`/movie/${movie._id}/shows/${selectedDate}`);
+    navigate(`/seat-layout/${selectedDate}/09:20%20AM`, {
+      state: {
+        movie,
+        theater: "PVR Cinemas",
+      },
+    });
   };
 
   // DYNAMIC DATES
@@ -358,7 +363,6 @@ const MovieDetails = () => {
               </button>
             </div>
 
-           
             {/* DATES */}
             <div className="mt-10">
               <h3 className="text-2xl font-bold text-white mb-5">

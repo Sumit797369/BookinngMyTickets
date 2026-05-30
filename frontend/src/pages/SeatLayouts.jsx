@@ -197,8 +197,6 @@ const SeatLayouts = () => {
               bookingData: {
                 movie: finalMovieId,
 
-                user: null,
-
                 seats: selectedSeats,
 
                 amount: totalAmount,
@@ -214,8 +212,8 @@ const SeatLayouts = () => {
               withCredentials: true,
             },
           );
-           fetchBookedSeats();
-           
+          fetchBookedSeats();
+
           toast.success("Payment successful 🍿");
 
           navigate("/my-bookings");
@@ -396,7 +394,42 @@ const SeatLayouts = () => {
                 ))}
               </div>
             </div>
+            {/* RECLINER SEATS */}
+            <div className="mt-16 flex flex-col items-center">
+              <h2 className="text-2xl font-bold text-[#FFCC00] mb-8">
+                Recliner Seats
+              </h2>
 
+              <div className="flex flex-wrap justify-center gap-6">
+                {Array.from({
+                  length: 8,
+                }).map((_, index) => {
+                  const seatId = `R${index + 1}`;
+
+                  const isBooked = bookedSeats.includes(seatId);
+
+                  const isSelected = selectedSeats.includes(seatId);
+
+                  return (
+                    <button
+                      key={seatId}
+                      onClick={() => handleSeatClick(seatId)}
+                      className={`px-7 py-4 rounded-2xl font-bold text-lg transition-all duration-300 border-2 ${
+                        isBooked
+                          ? "bg-gray-700 border-gray-700 text-white/70 cursor-not-allowed"
+                          : isSelected
+                            ? "bg-[#FFCC00] border-[#FFCC00] text-black shadow-[0_0_30px_rgba(255,204,0,0.6)] scale-110"
+                            : "bg-[#2A2A2A] border-[#FFCC00]/60 text-[#FFCC00] hover:bg-[#FFCC00]/10 hover:scale-105"
+                      }`}
+                    >
+                      {seatId}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <p className="text-gray-400 mt-5">Recliner Seats • ₹500</p>
+            </div>
             {/* BOTTOM */}
             <div className="mt-16 w-full bg-white/[0.03] border border-white/10 rounded-3xl p-6 flex flex-col lg:flex-row items-center justify-between gap-8">
               {/* SELECTED */}

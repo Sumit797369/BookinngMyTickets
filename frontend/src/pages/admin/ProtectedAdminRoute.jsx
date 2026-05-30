@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
+
 import axios from "axios";
+
 import { Navigate } from "react-router-dom";
+
 import { serverUrl } from "../../App";
-// import { serverUrl } from "../App";
 
 const ProtectedAdminRoute = ({ children }) => {
   const [loading, setLoading] = useState(true);
+
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
@@ -14,17 +17,11 @@ const ProtectedAdminRoute = ({ children }) => {
 
   const checkAdmin = async () => {
     try {
-      const { data } = await axios.get(
-        `${serverUrl}/api/auth/me`,
-        {
-          withCredentials: true,
-        }
-      );
+      const { data } = await axios.get(`${serverUrl}/api/auth/check-admin`, {
+        withCredentials: true,
+      });
 
-      if (
-        data.role === "admin" ||
-        data.role === "owner"
-      ) {
+      if (data.role === "admin") {
         setIsAuthorized(true);
       } else {
         setIsAuthorized(false);

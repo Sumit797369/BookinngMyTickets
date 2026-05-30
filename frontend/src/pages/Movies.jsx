@@ -24,7 +24,7 @@ const Movies = () => {
 
       // OMDB MOVIES
       const movieNames = [
-        "Dhurandhar",
+        
         "Dhurandhar The Revenge",
         "Bhooth Bangla",
         "Michael",
