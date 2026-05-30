@@ -17,7 +17,7 @@ const AdminProfile = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const { data } = await axios.get(`${serverUrl}/api/auth/me`, {
+        const { data } = await axios.get(`${serverUrl}/api/admin/profile`, {
           withCredentials: true,
         });
 

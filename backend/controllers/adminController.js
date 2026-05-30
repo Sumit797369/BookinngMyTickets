@@ -1,6 +1,37 @@
 import {Booking} from "../models/bookingModel.js";
 import { Movie } from "../models/movieModel.js";
 import { Show } from "../models/showModel.js";
+import jwt from "jsonwebtoken";
+
+export const getAdminProfile = async (req, res) => {
+  try {
+    const token = req.cookies.adminToken;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Admin not logged in",
+      });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    return res.status(200).json({
+      name: "PVR Admin",
+      email: decoded.email,
+      role: "admin",
+      provider: "Admin Panel",
+      avatar: "",
+    });
+
+  } catch (error) {
+    return res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
 export const getDashboardData =
   async (req, res) => {

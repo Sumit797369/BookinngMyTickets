@@ -1,6 +1,7 @@
 import express from "express";
 
 import {
+  getAdminProfile,
   getAllBookings,
   getDashboardData,
 } from "../controllers/adminController.js";
@@ -14,5 +15,6 @@ adminRouter.get("/dashboard", isAdmin, getDashboardData);
 
 // BOOKINGS
 adminRouter.get("/bookings", isAdmin, getAllBookings);
+adminRouter.get("/profile", getAdminProfile);
 
 export default adminRouter;
