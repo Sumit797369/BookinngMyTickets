@@ -7,7 +7,7 @@ import { serverUrl } from "./App";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain:  import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  authDomain: "bookmytickets-7577b.firebaseapp.com",
   projectId: "bookmytickets-7577b",
   storageBucket: "bookmytickets-7577b.firebasestorage.app",
   messagingSenderId: "219759870148",
