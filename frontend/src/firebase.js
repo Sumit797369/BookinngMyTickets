@@ -3,10 +3,11 @@ import { initializeApp } from "firebase/app";
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { serverUrl } from "./App";
 // Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: "bookmytickets-7577b.firebaseapp.com",
+  authDomain: serverUrl,
   projectId: "bookmytickets-7577b",
   storageBucket: "bookmytickets-7577b.firebasestorage.app",
   messagingSenderId: "219759870148",
