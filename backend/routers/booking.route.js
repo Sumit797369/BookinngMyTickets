@@ -2,6 +2,7 @@ import express from "express";
 
 import {
   bookTickets,
+  cancelBooking,
   getBookedSeats,
   getMyBookings,
 } from "../controllers/bookingController.js";
@@ -12,5 +13,6 @@ const bookingRouter = express.Router();
 bookingRouter.post("/book", isAuth, bookTickets);
 bookingRouter.get("/my-bookings", isAuth, getMyBookings);
 bookingRouter.get("/booked-seats/:movieId", getBookedSeats);
+bookingRouter.delete("/cancel/:id", cancelBooking);
 
 export default bookingRouter;

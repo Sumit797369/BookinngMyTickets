@@ -7,11 +7,13 @@ import { Download, CalendarDays, Clock3, MapPin, Armchair } from "lucide-react";
 import jsPDF from "jspdf";
 
 import { serverUrl } from "../App";
+import toast from "react-hot-toast";
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
   console.log("MY BOOKINGS DATA:", bookings);
   const [loading, setLoading] = useState(true);
+  const [cancelBookingId, setCancelBookingId] = useState(null);
 
   // FETCH BOOKINGS
   useEffect(() => {
@@ -79,6 +81,23 @@ const MyBookings = () => {
     doc.save(`${booking.movie?.title || "ticket"}.pdf`);
   };
 
+  const cancelBooking = async (bookingId) => {
+    try {
+      await axios.delete(`${serverUrl}/api/bookings/cancel/${bookingId}`, {
+        withCredentials: true,
+      });
+
+      setBookings((prev) =>
+        prev.filter((booking) => booking._id !== bookingId),
+      );
+
+      setCancelBookingId(null);
+
+      toast.success("Booking cancelled successfully");
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to cancel booking");
+    }
+  };
   // LOADING
   if (loading) {
     return (
@@ -187,20 +206,62 @@ const MyBookings = () => {
                   </div>
 
                   {/* BUTTON */}
-                  <button
-                    onClick={() => downloadTicket(booking)}
-                    className="group relative overflow-hidden mt-8 px-8 py-4 rounded-2xl bg-[#FF4D00] text-white font-bold text-lg transition-all duration-300 shadow-[0_0_35px_rgba(255,77,0,0.5)] hover:scale-105 hover:shadow-[0_0_45px_rgba(255,77,0,0.7)] active:scale-95 flex items-center gap-3"
-                  >
-                    <Download size={22} />
+                  <div className="flex gap-4 mt-8">
+                    <button
+                      onClick={() => downloadTicket(booking)}
+                      className="group relative overflow-hidden px-8 py-4 rounded-2xl bg-[#FF4D00] text-white font-bold text-lg transition-all duration-300 shadow-[0_0_35px_rgba(255,77,0,0.5)] hover:scale-105 hover:shadow-[0_0_45px_rgba(255,77,0,0.7)] active:scale-95 flex items-center gap-3"
+                    >
+                      <Download size={22} />
 
-                    <span className="relative z-10">Your Ticket</span>
+                      <span className="relative z-10">Your Ticket</span>
 
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#FF4D00] to-[#E61919] opacity-0 group-hover:opacity-100 transition-all duration-300" />
-                  </button>
+                      <div className="absolute inset-0 bg-gradient-to-r from-[#FF4D00] to-[#E61919] opacity-0 group-hover:opacity-100 transition-all duration-300" />
+                    </button>
+
+                    <button
+                      onClick={() => setCancelBookingId(booking._id)}
+                      className="px-8 py-4 rounded-2xl bg-red-500 text-white font-bold hover:bg-red-600 transition-all"
+                    >
+                      Cancel Booking
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {cancelBookingId && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] flex items-center justify-center">
+          <div className="w-[430px] bg-[#111111] border border-red-500/30 rounded-3xl p-8 shadow-[0_0_35px_rgba(239,68,68,0.25)]">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                🚫
+              </div>
+
+              <h2 className="text-2xl font-bold text-white">Cancel Booking</h2>
+            </div>
+
+            <p className="text-gray-400 mb-8">
+              Are you sure you want to cancel this booking?
+            </p>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setCancelBookingId(null)}
+                className="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all"
+              >
+                Not Now
+              </button>
+
+              <button
+                onClick={() => cancelBooking(cancelBookingId)}
+                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 transition-all font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </section>
