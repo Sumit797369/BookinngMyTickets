@@ -10,7 +10,7 @@ import { serverUrl } from "../App";
 
 const MyBookings = () => {
   const [bookings, setBookings] = useState([]);
-
+  console.log("MY BOOKINGS DATA:", bookings);
   const [loading, setLoading] = useState(true);
 
   // FETCH BOOKINGS

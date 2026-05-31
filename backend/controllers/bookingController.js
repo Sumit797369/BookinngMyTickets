@@ -6,7 +6,7 @@ export const bookTickets = async (req, res) => {
     const { showId, seats, amount, movieId, theater, date, time } = req.body;
 
     const token = req.cookies.token || req.cookies.userToken;
-    
+
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     // CHECK ALREADY BOOKED SEATS
@@ -101,24 +101,31 @@ export const getBookedSeats = async (req, res) => {
 
 export const getMyBookings = async (req, res) => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies.token || req.cookies.userToken;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const bookings = await Booking.find({
       user: decoded.id,
     })
-      .populate({
-        path: "movie",
-        model: "Movie",
-      })
+      .populate("movie")
       .populate("user", "name email")
       .sort({
         createdAt: -1,
       });
+
     console.log("BOOKINGS:", bookings);
+
     return res.status(200).json(bookings);
   } catch (error) {
+    console.log("GET MY BOOKINGS ERROR:", error);
+
     return res.status(500).json({
       message: error.message,
     });

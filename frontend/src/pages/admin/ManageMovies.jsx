@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from "react";
-
 import axios from "axios";
-
 import { Search, Pencil, Trash2, Film, Plus } from "lucide-react";
-
 import { serverUrl } from "../../App";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast";
 
 const ManageMovies = () => {
   const [movies, setMovies] = useState([]);
@@ -13,6 +11,7 @@ const ManageMovies = () => {
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
+  const [deleteMovieId, setDeleteMovieId] = useState(null);
   const navigate = useNavigate();
   useEffect(() => {
     fetchMovies();
@@ -34,17 +33,17 @@ const ManageMovies = () => {
 
   const deleteMovie = async (id) => {
     try {
-      const confirmDelete = window.confirm("Delete this movie?");
-
-      if (!confirmDelete) return;
-
       await axios.delete(`${serverUrl}/api/movies/${id}`, {
         withCredentials: true,
       });
 
       setMovies((prev) => prev.filter((movie) => movie._id !== id));
+
+      setDeleteMovieId(null);
+
+      toast.success("Movie deleted successfully");
     } catch (error) {
-      console.log(error);
+      toast.error(error.response?.data?.message || "Failed to delete movie");
     }
   };
 
@@ -63,27 +62,24 @@ const ManageMovies = () => {
         </div>
 
         <button
-  onClick={() =>
-    navigate("/admin/add-movie")
-  }
-  className="group relative overflow-hidden flex items-center gap-3 bg-[#FF4D00] px-6 py-3 rounded-2xl font-semibold shadow-[0_0_20px_rgba(255,77,0,0.35)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(255,77,0,0.55)]"
->
-  {/* Glow */}
-  <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-500 opacity-0 group-hover:opacity-100 transition-all duration-500" />
+          onClick={() => navigate("/admin/add-movie")}
+          className="group relative overflow-hidden flex items-center gap-3 bg-[#FF4D00] px-6 py-3 rounded-2xl font-semibold shadow-[0_0_20px_rgba(255,77,0,0.35)] transition-all duration-300 hover:scale-105 hover:shadow-[0_0_35px_rgba(255,77,0,0.55)]"
+        >
+          {/* Glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-red-500 opacity-0 group-hover:opacity-100 transition-all duration-500" />
 
-  {/* Shine Effect */}
-  <div className="absolute top-0 left-[-100%] w-full h-full bg-white/20 skew-x-12 group-hover:left-[120%] transition-all duration-700" />
+          {/* Shine Effect */}
+          <div className="absolute top-0 left-[-100%] w-full h-full bg-white/20 skew-x-12 group-hover:left-[120%] transition-all duration-700" />
 
-  {/* Content */}
-  <div className="relative z-10 flex items-center gap-3">
-    <Plus
-      size={22}
-      className="group-hover:rotate-90 transition-all duration-300"
-    />
-
-    Add Movie
-  </div>
-</button>
+          {/* Content */}
+          <div className="relative z-10 flex items-center gap-3">
+            <Plus
+              size={22}
+              className="group-hover:rotate-90 transition-all duration-300"
+            />
+            Add Movie
+          </div>
+        </button>
       </div>
 
       {/* SEARCH */}
@@ -143,7 +139,7 @@ const ManageMovies = () => {
 
                   {/* DELETE */}
                   <button
-                    onClick={() => deleteMovie(movie._id)}
+                    onClick={() => setDeleteMovieId(movie._id)}
                     className="w-11 h-11 rounded-2xl bg-black/50 backdrop-blur-xl flex items-center justify-center hover:bg-red-500 transition-all"
                   >
                     <Trash2 size={20} />
@@ -159,7 +155,13 @@ const ManageMovies = () => {
 
                     <span>•</span>
 
-                    <span>{movie.duration}</span>
+                    <span>
+                      {movie.duration?.includes("min")
+                        ? `${Math.floor(
+                            parseInt(movie.duration) / 60,
+                          )}h ${parseInt(movie.duration) % 60}m`
+                        : movie.duration}
+                    </span>
                   </div>
 
                   {/* GENRES */}
@@ -177,6 +179,39 @@ const ManageMovies = () => {
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {deleteMovieId && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] flex items-center justify-center">
+          <div className="w-[430px] bg-[#111111] border border-[#FF4D00]/30 rounded-3xl p-8 shadow-[0_0_35px_rgba(255,77,0,0.25)]">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-12 h-12 rounded-full bg-red-500/20 flex items-center justify-center">
+                <Trash2 size={24} className="text-red-500" />
+              </div>
+
+              <h2 className="text-2xl font-bold">Delete Movie</h2>
+            </div>
+
+            <p className="text-gray-400 mb-8">
+              Are you sure you want to permanently delete this movie?
+            </p>
+
+            <div className="flex gap-4">
+              <button
+                onClick={() => setDeleteMovieId(null)}
+                className="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={() => deleteMovie(deleteMovieId)}
+                className="flex-1 py-3 rounded-xl bg-red-500 hover:bg-red-600 transition-all font-semibold"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

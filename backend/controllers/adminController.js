@@ -114,3 +114,32 @@ export const getDashboardData =
       });
     }
   };
+
+ export const deleteMovie = async (req, res) => {
+  try {
+
+    const movie =
+      await Movie.findByIdAndDelete(
+        req.params.id
+      );
+
+    if (!movie) {
+      return res.status(404).json({
+        message: "Movie not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Movie deleted successfully",
+    });
+
+  } catch (error) {
+
+    return res.status(500).json({
+      message:
+        error.message,
+    });
+  }
+};
