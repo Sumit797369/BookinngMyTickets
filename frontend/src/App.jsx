@@ -26,7 +26,7 @@ import AdminProfile from "./pages/admin/AdminProfile";
 import ManageBookings from "./pages/admin/ManageBookings";
 import ManageShows from "./pages/admin/ManageShows";
 
-export const serverUrl = "http://localhost:8000";
+export const serverUrl = "https://backend-v3wh.onrender.com";
 
 const App = () => {
   const location = useLocation();
